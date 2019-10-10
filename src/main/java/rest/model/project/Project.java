@@ -1,12 +1,9 @@
-package project.model;
+package rest.model.project;
 
-import issue.model.Issue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 
 @NoArgsConstructor

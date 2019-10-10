@@ -1,4 +1,4 @@
-package issue.model;
+package rest.model.issue;
 
 
 public enum IssueStatus {

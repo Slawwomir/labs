@@ -1,8 +1,8 @@
-package issue;
+package service;
 
-import issue.model.Issue;
-import issue.model.IssueStatus;
-import issue.model.IssueType;
+import rest.model.issue.Issue;
+import rest.model.issue.IssueStatus;
+import rest.model.issue.IssueType;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -38,7 +38,7 @@ public class IssueService {
     }
 
     public synchronized void saveIssue(Issue issue) {
-        if(issue.getId() != null) {
+        if (issue.getId() != null) {
             issues.removeIf(i -> i.getId().equals(issue.getId()));
             issues.add(new Issue(issue));
         } else {
@@ -48,6 +48,10 @@ public class IssueService {
     }
 
     public void removeIssue(Issue issue) {
-        issues.removeIf(i -> i.getId().equals(issue.getId()));
+        removeIssue(issue.getId());
+    }
+
+    public void removeIssue(Long issueId) {
+        issues.removeIf(issue -> issue.getId().equals(issueId));
     }
 }

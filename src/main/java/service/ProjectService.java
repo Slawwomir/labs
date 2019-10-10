@@ -1,11 +1,9 @@
-package project;
+package service;
 
-import lombok.Getter;
-import project.model.Project;
+import rest.model.project.Project;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +39,10 @@ public class ProjectService {
     }
 
     public void removeProject(Project project) {
-        projects.removeIf(p -> p.getId().equals(project.getId()));
+        removeProject(project.getId());
+    }
+
+    public void removeProject(Long projectId) {
+        projects.removeIf(p -> p.getId().equals(projectId));
     }
 }

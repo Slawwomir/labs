@@ -1,4 +1,4 @@
-package issue.model;
+package rest.model.issue;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
