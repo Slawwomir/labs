@@ -30,27 +30,6 @@ export class IssueViewComponent implements OnInit {
 
   openEditMode(): void {
     this.editMode = true;
-    this.issueEdit = Object.assign({}, this.issue);
-
-    if (!this.statuses) {
-      this.getStatuses();
-    }
-
-    if (!this.types) {
-      this.getIssueTypes();
-    }
-  }
-
-  save(): void {
-    this.editMode = false;
-
-    this.issueService.updateIssue(this.issueEdit)
-      .subscribe(issue => this.issue = issue);
-  }
-
-  private getStatuses(): void {
-    this.issueService.getStatuses()
-      .subscribe(statuses => this.statuses = statuses);
   }
 
   private getIssue(): void {
@@ -61,8 +40,8 @@ export class IssueViewComponent implements OnInit {
       });
   }
 
-  private getIssueTypes() {
-    this.issueService.getIssueTypes()
-      .subscribe(issueTypes => this.types = issueTypes);
+  save(issue: Issue) {
+    this.editMode = false;
+    this.issue = issue;
   }
 }

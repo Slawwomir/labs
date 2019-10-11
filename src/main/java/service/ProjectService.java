@@ -4,6 +4,7 @@ import rest.model.project.Project;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,6 +12,9 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class ProjectService {
+
+    @Inject
+    private IssueService issueService;
 
     private final List<Project> projects = new ArrayList<>();
 
@@ -45,6 +49,7 @@ public class ProjectService {
     }
 
     public void removeProject(Long projectId) {
+        issueService.findIssuesByProjectId(projectId).forEach(issueService::removeIssue);
         projects.removeIf(p -> p.getId().equals(projectId));
     }
 }

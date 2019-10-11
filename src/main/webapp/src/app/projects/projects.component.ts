@@ -33,4 +33,9 @@ export class ProjectsComponent implements OnInit {
         this.projects.push(project)
       })
   }
+
+  remove(project: Project): void {
+    this.projectService.removeProject(project.id)
+      .subscribe(_ => this.getProjects());
+  }
 }

@@ -12,6 +12,7 @@ import {HttpClientModule} from "@angular/common/http";
 import {IssueListComponent} from './issue-list/issue-list.component';
 import {IssueViewComponent} from './issue-view/issue-view.component';
 import {CommonModule} from "@angular/common";
+import { IssueEditComponent } from './issue-edit/issue-edit.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import {CommonModule} from "@angular/common";
     MessagesComponent,
     DashboardComponent,
     IssueListComponent,
-    IssueViewComponent
+    IssueViewComponent,
+    IssueEditComponent
   ],
   imports: [
     BrowserModule,

@@ -23,7 +23,7 @@ export class IssueService {
   }
 
   getIssue(id: number): Observable<Issue> {
-    return this.httpClient.get<Issue>(`${this.getIssuesUrl()}/${id}`,this.httpOptions);
+    return this.httpClient.get<Issue>(`${this.getIssuesUrl()}/${id}`, this.httpOptions);
   }
 
   createIssue(issue: Issue): Observable<Issue> {
@@ -36,6 +36,10 @@ export class IssueService {
 
   getIssueTypes(): Observable<string[]> {
     return this.httpClient.get<string[]>(`${this.getIssuesUrl()}/type`, this.httpOptions);
+  }
+
+  removeIssue(issue: Issue): Observable<any> {
+    return this.httpClient.delete(`${this.getIssuesUrl()}/${issue.id}`, this.httpOptions);
   }
 
   private getIssuesUrl(): string {
