@@ -28,7 +28,7 @@ public class ProjectService {
         return projects.stream().filter(p -> p.getId().equals(id)).findFirst().orElse(null);
     }
 
-    public synchronized void saveProject(Project project) {
+    public synchronized Project saveProject(Project project) {
         if (project.getId() != null) {
             projects.removeIf(p -> p.getId().equals(project.getId()));
             projects.add(project);
@@ -36,6 +36,8 @@ public class ProjectService {
             project.setId(projects.stream().mapToLong(Project::getId).max().orElse(0) + 1);
             projects.add(new Project(project));
         }
+
+        return project;
     }
 
     public void removeProject(Project project) {

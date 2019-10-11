@@ -6,8 +6,10 @@ label {
   color: #607D8B;
   font-weight: bold;
 }
-input {
-  height: 2em;
+ul {
+  list-style-type: none;
+}
+input, textarea {
   font-size: 1em;
   padding-left: .4em;
 }

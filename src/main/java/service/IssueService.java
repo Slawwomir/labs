@@ -37,7 +37,7 @@ public class IssueService {
         return issues.stream().filter(i -> i.getProjectId().equals(projectId)).collect(Collectors.toList());
     }
 
-    public synchronized void saveIssue(Issue issue) {
+    public synchronized Issue saveIssue(Issue issue) {
         if (issue.getId() != null) {
             issues.removeIf(i -> i.getId().equals(issue.getId()));
             issues.add(new Issue(issue));
@@ -45,6 +45,8 @@ public class IssueService {
             issue.setId(issues.stream().mapToLong(Issue::getId).max().orElse(0) + 1);
             issues.add(new Issue(issue));
         }
+
+        return issue;
     }
 
     public void removeIssue(Issue issue) {
@@ -53,5 +55,13 @@ public class IssueService {
 
     public void removeIssue(Long issueId) {
         issues.removeIf(issue -> issue.getId().equals(issueId));
+    }
+
+    public List<IssueStatus> getIssueStatuses() {
+        return List.of(IssueStatus.values());
+    }
+
+    public List<IssueType> getIssueTypes() {
+        return List.of(IssueType.values());
     }
 }

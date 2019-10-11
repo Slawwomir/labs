@@ -1,0 +1,13 @@
+<ul class="issues">
+  <li *ngFor="let issue of issues">
+    <a routerLink="/issue/{{issue.id}}">
+      <span class="badge">{{issue.id}}</span> {{issue.name}}
+    </a>
+  </li>
+</ul>
+<div>
+<label><input #issueName placeholder="What has to be done?"/></label>
+  <button (click)="add(issueName.value); issueName.value=''">
+    create
+  </button>
+</div>

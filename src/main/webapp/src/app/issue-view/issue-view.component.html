@@ -1,0 +1,41 @@
+<div *ngIf="issue">
+  <h2>[{{issue.type}}] {{issue.name}}</h2>
+  <h3><strong>{{issue.status}}</strong></h3>
+  <h3>{{issue.description}}</h3>
+
+  <button (click)="openEditMode()">Edit</button>
+
+  <div *ngIf="editMode && issueEdit">
+    <ul>
+      <li>
+        <label>Name:
+          <input [(ngModel)]="issueEdit.name" placeholder="name"/>
+        </label>
+      </li>
+
+      <li>
+        <label>Type:
+          <select [(ngModel)]="issueEdit.type">
+            <option *ngFor="let type of types" [value]="type">{{type}}</option>
+          </select>
+        </label>
+      </li>
+
+      <li>
+        <label>Status:
+          <select [(ngModel)]="issueEdit.status">
+            <option *ngFor="let opt of statuses" [value]="opt">{{opt}}</option>
+          </select>
+        </label>
+      </li>
+
+      <li>
+        <label>Description:
+          <textarea [(ngModel)]="issueEdit.description" placeholder="description"></textarea>
+        </label>
+      </li>
+    </ul>
+
+    <button (click)="save()">Save</button>
+  </div>
+</div>

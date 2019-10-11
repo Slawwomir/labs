@@ -6,3 +6,13 @@
     </a>
   </li>
 </ul>
+
+<div>
+  <h3>Add new project</h3>
+  <label>Project name:
+    <input #projectName/>
+  </label>
+  <button (click)="add(projectName.value); projectName.value=''">
+    create
+  </button>
+</div>

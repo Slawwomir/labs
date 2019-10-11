@@ -13,6 +13,7 @@ import {Project} from "../project";
 export class ProjectDetailComponent implements OnInit {
 
   project: Project;
+  editMode: boolean;
 
   constructor(
     private route: ActivatedRoute,
@@ -33,5 +34,15 @@ export class ProjectDetailComponent implements OnInit {
 
   goBack(): void {
     this.location.back();
+  }
+
+  save(): void {
+    this.projectService.updateProject(this.project)
+      .subscribe();
+    this.editMode = false;
+  }
+
+  edit(): void {
+    this.editMode = true;
   }
 }
