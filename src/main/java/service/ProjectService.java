@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,8 +21,8 @@ public class ProjectService {
 
     @PostConstruct
     public void init() {
-        projects.add(new Project(1L, "Labki z Javy JEE"));
-        projects.add(new Project(2L, "Praca inżynierska"));
+        projects.add(new Project(1L, "Labki z Javy JEE", 1L, Collections.emptyList()));
+        projects.add(new Project(2L, "Praca inżynierska", 1L, Collections.emptyList()));
     }
 
     public List<Project> findAllProjects() {

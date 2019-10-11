@@ -3,21 +3,16 @@ package rest.resource;
 import rest.model.issue.Issue;
 import rest.model.issue.IssueStatus;
 import rest.model.issue.IssueType;
+import rest.model.issue.Issues;
 import service.IssueService;
 import service.ProjectService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @Path("issue")
@@ -33,10 +28,13 @@ public class IssueResource {
     private ProjectService projectService;
 
     @GET
-    public Response getIssues() {
-        List<Issue> issues = issueService.findAllIssues();
+    public Response getIssues(@Context UriInfo uriInfo, @QueryParam("start") int start, @QueryParam("size") @DefaultValue("2") int size) {
+        List<Issue> projects = issueService.findAllIssues();
+        List<Link> links = getLinksForIssues(projects, uriInfo, start, size);
+        List<Issue> projectsSubList = projects.subList(start, Math.min(start + size, projects.size()));
+        Issues issuesEntity = new Issues(projectsSubList, links);
 
-        return Response.ok(issues).build();
+        return Response.ok(issuesEntity).build();
     }
 
     @POST
@@ -97,5 +95,40 @@ public class IssueResource {
         List<IssueType> issueTypes = issueService.getIssueTypes();
 
         return Response.ok(issueTypes).build();
+    }
+
+    private List<Link> getLinksForIssues(List<Issue> projects, UriInfo uriInfo, int start, int size) {
+        UriBuilder pathBuilder = uriInfo.getAbsolutePathBuilder();
+        pathBuilder.queryParam("start", "{start}");
+        pathBuilder.queryParam("size", "{size}");
+
+        List<Link> links = new ArrayList<>();
+        links.add(getSelfLink(uriInfo));
+
+        if (start + size < projects.size()) {
+            int next = start + size;
+            URI nextUri = pathBuilder.clone().build(next, size);
+            Link nextLink = Link.fromUri(nextUri)
+                    .rel("next")
+                    .type("application/json")
+                    .build();
+            links.add(nextLink);
+        }
+
+        if (start > 0) {
+            int previous = Math.max(start - size, 0);
+            URI previousUri = pathBuilder.clone().build(previous, size);
+            Link previousLink = Link.fromUri(previousUri)
+                    .rel("previous")
+                    .type("application/json")
+                    .build();
+            links.add(previousLink);
+        }
+
+        return links;
+    }
+
+    private Link getSelfLink(UriInfo uriInfo) {
+        return Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
     }
 }

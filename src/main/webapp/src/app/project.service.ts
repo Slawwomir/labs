@@ -4,7 +4,7 @@ import {PROJECTS} from "./mock-projects";
 import {Observable, of} from "rxjs";
 import {MessageService} from "./message.service";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {catchError, tap} from "rxjs/operators";
+import {catchError, map, tap} from "rxjs/operators";
 import {Issue} from "./issue";
 
 @Injectable({
@@ -16,7 +16,7 @@ export class ProjectService {
   private projectsPath = '/project';
 
   httpOptions = {
-    headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    headers: new HttpHeaders({'Content-Type': 'application/json'})
   };
 
   constructor(
@@ -29,6 +29,7 @@ export class ProjectService {
     this.messageService.add('ProjectService: fetched projects');
     return this.httpClient.get<Project[]>(this.getProjectsUrl())
       .pipe(
+        map(response => response["projects"]),
         tap(_ => this.log('get projects')),
         catchError(this.handleError<any>('getProjects'))
       );

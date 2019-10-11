@@ -18,11 +18,11 @@ public class IssueService {
 
     @PostConstruct
     public void init() {
-        issues.add(new Issue(1L, IssueType.TASK, IssueStatus.OPEN, "Zrób labkę 1", "No pierwsza to jest taka spoko, więc ją zrób", 1L));
-        issues.add(new Issue(2L, IssueType.TASK, IssueStatus.OPEN, "Zrób labkę 1", "No pierwsza to jest taka spoko, więc ją zrób", 1L));
-        issues.add(new Issue(3L, IssueType.TASK, IssueStatus.OPEN, "Zrób labkę 1", "No pierwsza to jest taka spoko, więc ją zrób", 1L));
-        issues.add(new Issue(4L, IssueType.BUG, IssueStatus.OPEN, "Nie działa strona", "Jak się wejdzie, to nie działa. Może nie wchodzić?", 2L));
-        issues.add(new Issue(5L, IssueType.BUG, IssueStatus.OPEN, "Nie działa strona", "Jak się wejdzie, to nie działa. Może nie wchodzić?", 2L));
+        issues.add(new Issue(1L, IssueType.TASK, IssueStatus.OPEN, "Zrób labkę 1", "No pierwsza to jest taka spoko, więc ją zrób", 1L, 1L, null, null));
+        issues.add(new Issue(2L, IssueType.TASK, IssueStatus.OPEN, "Zrób labkę 1", "No pierwsza to jest taka spoko, więc ją zrób", 1L, 1L, null, null));
+        issues.add(new Issue(3L, IssueType.TASK, IssueStatus.OPEN, "Zrób labkę 1", "No pierwsza to jest taka spoko, więc ją zrób", 1L, 1L, null, null));
+        issues.add(new Issue(4L, IssueType.BUG, IssueStatus.OPEN, "Nie działa strona", "Jak się wejdzie, to nie działa. Może nie wchodzić?", 2L, 1L, null, null));
+        issues.add(new Issue(5L, IssueType.BUG, IssueStatus.OPEN, "Nie działa strona", "Jak się wejdzie, to nie działa. Może nie wchodzić?", 2L, 1L, null, null));
     }
 
     public List<Issue> findAllIssues() {
