@@ -9,6 +9,8 @@ import javax.ws.rs.core.Link;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @AllArgsConstructor
@@ -17,14 +19,21 @@ import java.util.List;
 @Setter
 @XmlRootElement
 public class Issue {
+    @XmlElement
     private Long id;
+    @XmlElement
     private IssueType type;
+    @XmlElement
     private IssueStatus status;
+    @XmlElement
     private String name;
+    @XmlElement
     private String description;
+    @XmlElement
     private Long projectId;
-
+    @XmlElement
     private Long reporterId;
+    @XmlElement
     private Long assigneeId;
 
     @XmlElement
@@ -40,5 +49,6 @@ public class Issue {
         this.projectId = issue.projectId;
         this.reporterId = issue.reporterId;
         this.assigneeId = issue.assigneeId;
+        this.links = issue.links == null ? Collections.emptyList() : new ArrayList<>(issue.links);
     }
 }

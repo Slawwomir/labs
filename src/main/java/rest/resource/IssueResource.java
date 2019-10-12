@@ -9,8 +9,22 @@ import service.ProjectService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Link;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,10 +89,16 @@ public class IssueResource {
 
     @GET
     @Path("{issueId}")
-    public Response getIssue(@PathParam("issueId") Long issueId) {
+    public Response getIssue(@Context UriInfo uriInfo, @PathParam("issueId") Long issueId) {
         Issue issue = issueService.findIssue(issueId);
 
-        return issue == null ? Response.status(Response.Status.BAD_REQUEST).build() : Response.ok(issue).build();
+        if (issue == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        setLinksForIssue(uriInfo, issue);
+
+        return Response.ok(issue).build();
     }
 
     @GET
@@ -103,7 +123,7 @@ public class IssueResource {
         pathBuilder.queryParam("size", "{size}");
 
         List<Link> links = new ArrayList<>();
-        links.add(getSelfLink(uriInfo));
+        links.add(Link.fromUri(uriInfo.getRequestUri()).rel("self").build());
 
         if (start + size < projects.size()) {
             int next = start + size;
@@ -128,7 +148,37 @@ public class IssueResource {
         return links;
     }
 
-    private Link getSelfLink(UriInfo uriInfo) {
-        return Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
+    public static void setLinksForIssue(@Context UriInfo uriInfo, Issue issue) {
+        Long issueId = issue.getId();
+        List<Link> links = new ArrayList<>();
+        links.add(getSelfLinkForIssue(uriInfo, issueId));
+        links.add(getDeleteLinkForIssue(uriInfo, issueId));
+        links.add(getReporterLink(uriInfo, issue.getReporterId()));
+        links.add(getProjectLink(uriInfo, issue.getProjectId()));
+        if(issue.getAssigneeId() != null) {
+            links.add(getAssigneeLink(uriInfo, issue.getAssigneeId()));
+        }
+
+        issue.setLinks(links);
+    }
+
+    private static Link getSelfLinkForIssue(UriInfo uriInfo, Long issueId) {
+        return Link.fromUri(uriInfo.getBaseUriBuilder().path("issue").path(String.valueOf(issueId)).build()).rel("self").build();
+    }
+
+    private static Link getDeleteLinkForIssue(UriInfo uriInfo, Long issueId) {
+        return Link.fromUri(uriInfo.getBaseUriBuilder().path("issue").path(String.valueOf(issueId)).build()).param("method", "DELETE").rel("delete").build();
+    }
+
+    private static Link getReporterLink(UriInfo uriInfo, Long userId) {
+        return Link.fromUri(uriInfo.getBaseUriBuilder().path(UserResource.class).path(UserResource.class, "getUser").build(userId)).rel("reporter").build();
+    }
+
+    private static Link getAssigneeLink(UriInfo uriInfo, Long userId) {
+        return Link.fromUri(uriInfo.getBaseUriBuilder().path(UserResource.class).path(UserResource.class, "getUser").build(userId)).rel("assignee").build();
+    }
+
+    private static Link getProjectLink(UriInfo uriInfo, Long projecId) {
+        return Link.fromUri(uriInfo.getBaseUriBuilder().path(ProjectResource.class).path(ProjectResource.class, "getProject").build(projecId)).rel("project").build();
     }
 }

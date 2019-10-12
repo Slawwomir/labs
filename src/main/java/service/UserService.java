@@ -19,8 +19,8 @@ public class UserService {
 
     @PostConstruct
     public void init() {
-        users.add(new User(1L, "Andriu"));
-        users.add(new User(2L, "Krystyna"));
+        users.add(new User(1L, "Andriu", null));
+        users.add(new User(2L, "Krystyna", null));
     }
 
     public List<User> findAllUsers() {

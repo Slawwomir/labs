@@ -1,6 +1,7 @@
 package rest.resource;
 
 import rest.model.issue.Issue;
+import rest.model.issue.Issues;
 import rest.model.project.Project;
 import rest.model.project.Projects;
 import service.IssueService;
@@ -49,6 +50,7 @@ public class ProjectResource {
         List<Project> projects = projectService.findAllProjects();
         List<Link> links = getLinksForProjects(projects, uriInfo, start, size);
         List<Project> projectsSubList = projects.subList(start, Math.min(start + size, projects.size()));
+        projectsSubList.forEach(project -> setLinksForProject(uriInfo, project));
         Projects projectsEntity = new Projects(projectsSubList, links);
 
         return Response.ok(projectsEntity).links(links.toArray(Link[]::new)).build();
@@ -91,18 +93,13 @@ public class ProjectResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        List<Link> links = new ArrayList<>();
-        links.add(getSelfLink(uriInfo));
-        links.add(getDeleteLink(uriInfo));
-        links.add(getIssuesLink(uriInfo));
-
-        project.setLinks(links);
+        setLinksForProject(uriInfo, project);
         return Response.ok(project).build();
     }
 
     @GET
     @Path("{projectId}/issues")
-    public Response getProjectIssues(@PathParam("projectId") Long projectId) {
+    public Response getProjectIssues(@Context UriInfo uriInfo, @PathParam("projectId") Long projectId) {
         Project project = projectService.findProject(projectId);
 
         if (project == null) {
@@ -110,8 +107,10 @@ public class ProjectResource {
         }
 
         List<Issue> issues = issueService.findIssuesByProjectId(projectId);
+        issues.forEach(issue -> IssueResource.setLinksForIssue(uriInfo, issue));
 
-        return Response.ok(issues).build();
+        List<Link> link = List.of(Link.fromUri(uriInfo.getRequestUri()).rel("self").build());
+        return Response.ok(new Issues(issues, link)).build();
     }
 
     private List<Link> getLinksForProjects(List<Project> projects, UriInfo uriInfo, int start, int size) {
@@ -120,7 +119,7 @@ public class ProjectResource {
         pathBuilder.queryParam("size", "{size}");
 
         List<Link> links = new ArrayList<>();
-        links.add(getSelfLink(uriInfo));
+        links.add(Link.fromUri(uriInfo.getRequestUri()).rel("self").build());
 
         if (start + size < projects.size()) {
             int next = start + size;
@@ -145,15 +144,30 @@ public class ProjectResource {
         return links;
     }
 
-    private Link getSelfLink(UriInfo uriInfo) {
-        return Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
+    private static void setLinksForProject(@Context UriInfo uriInfo, Project project) {
+        Long projectId = project.getId();
+        List<Link> links = new ArrayList<>();
+        links.add(getSelfLinkForProject(uriInfo, projectId));
+        links.add(getDeleteLinkForProject(uriInfo, projectId));
+        links.add(getIssuesLinkForProject(uriInfo, projectId));
+        links.add(getProjectOwnerForProject(uriInfo, project.getProjectOwnerId()));
+
+        project.setLinks(links);
     }
 
-    private Link getDeleteLink(UriInfo uriInfo) {
-        return Link.fromUri(uriInfo.getRequestUri()).param("method", "DELETE").rel("delete").build();
+    private static Link getProjectOwnerForProject(UriInfo uriInfo, Long projectOwnerId) {
+        return Link.fromUri(uriInfo.getBaseUriBuilder().path("user").path(String.valueOf(projectOwnerId)).build()).rel("projectOwner").build();
     }
 
-    private Link getIssuesLink(UriInfo uriInfo) {
-        return Link.fromUri(uriInfo.getRequestUriBuilder().path("issues").build()).rel("issues").build();
+    private static Link getSelfLinkForProject(UriInfo uriInfo, Long projectId) {
+        return Link.fromUri(uriInfo.getBaseUriBuilder().path("project").path(String.valueOf(projectId)).build()).rel("self").build();
+    }
+
+    private static Link getDeleteLinkForProject(UriInfo uriInfo, Long projectId) {
+        return Link.fromUri(uriInfo.getBaseUriBuilder().path("project").path(String.valueOf(projectId)).build()).param("method", "DELETE").rel("delete").build();
+    }
+
+    private static Link getIssuesLinkForProject(UriInfo uriInfo, Long projectId) {
+        return Link.fromUri(uriInfo.getBaseUriBuilder().path("project").path(String.valueOf(projectId)).path("issues").build()).rel("issues").build();
     }
 }

@@ -1,43 +1,45 @@
 package rest.resource;
 
 import rest.model.user.User;
+import rest.model.user.Users;
 import service.UserService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.util.List;
 
 @RequestScoped
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 @Path("user")
 public class UserResource {
 
-    private final UserService userService;
-
     @Inject
-    public UserResource(UserService userService) {
-        this.userService = userService;
-    }
+    private UserService userService;
 
     @GET
-    public Response getUsers() {
-        return Response.ok(userService.findAllUsers()).build();
+    public Response getUsers(@Context UriInfo uriInfo) {
+        List<User> allUsers = userService.findAllUsers();
+        List<Link> links = List.of(Link.fromUri(uriInfo.getRequestUri()).rel("self").build());
+
+        return Response.ok(new Users(allUsers, links)).build();
     }
 
     @GET
     @Path("{userId}")
-    public Response getUser(@PathParam("userId") Long userId) {
+    public Response getUser(@Context UriInfo uriInfo, @PathParam("userId") Long userId) {
         User user = userService.findUser(userId);
 
         if (user == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
+        user.setLinks(List.of(
+                Link.fromUri(uriInfo.getRequestUri()).rel("self").build(),
+                Link.fromUri(uriInfo.getRequestUri()).rel("delete").param("method", "DELETE").build()
+        ));
         return Response.ok(user).build();
     }
 
