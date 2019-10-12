@@ -3,7 +3,7 @@ import {Project} from "./project";
 import {PROJECTS} from "./mock-projects";
 import {Observable, of} from "rxjs";
 import {MessageService} from "./message.service";
-import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {catchError, map, tap} from "rxjs/operators";
 import {Issue} from "./issue";
 
@@ -27,7 +27,7 @@ export class ProjectService {
 
   getProjects(): Observable<Project[]> {
     this.messageService.add('ProjectService: fetched projects');
-    return this.httpClient.get<Project[]>(this.getProjectsUrl())
+    return this.httpClient.get<Project[]>(this.getProjectsUrl(), { params: new HttpParams().set("size", "-1") })
       .pipe(
         map(response => response["projects"]),
         tap(_ => this.log('get projects')),
@@ -71,6 +71,7 @@ export class ProjectService {
   getIssues(project: Project): Observable<Issue[]> {
     return this.httpClient.get(`${this.getProjectsUrl()}/${project.id}/issues`)
       .pipe(
+        map(response => response["issues"]),
         tap(_ => this.log(`get project issues id=${project.id}`)),
         catchError(this.handleError<any>('getIssues'))
       )

@@ -35,6 +35,6 @@ public class Project {
         this.id = project.id;
         this.name = project.name;
         this.projectOwnerId = project.projectOwnerId;
-        this.links = new ArrayList<>(project.links);
+        this.links = project.links == null ? List.of() : new ArrayList<>(project.links);
     }
 }

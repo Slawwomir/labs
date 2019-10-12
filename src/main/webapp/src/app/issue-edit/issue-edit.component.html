@@ -27,6 +27,14 @@
         <textarea [(ngModel)]="issue.description" placeholder="description"></textarea>
       </label>
     </li>
+
+    <li>
+      <label>Projects:
+        <select [(ngModel)]="issue.projectId">
+          <option *ngFor="let project of projects" [value]="project.id">{{project.name}}</option>
+        </select>
+      </label>
+    </li>
   </ul>
 
   <button (click)="save()">Save</button>

@@ -47,6 +47,10 @@ public class ProjectResource {
             @QueryParam("size") @DefaultValue("2") int size,
             @Context UriInfo uriInfo
     ) {
+        if(size <= 0) {
+            size = Integer.MAX_VALUE;
+        }
+
         List<Project> projects = projectService.findAllProjects();
         List<Link> links = getLinksForProjects(projects, uriInfo, start, size);
         List<Project> projectsSubList = projects.subList(start, Math.min(start + size, projects.size()));
@@ -58,7 +62,7 @@ public class ProjectResource {
 
     @POST
     public Response addProject(Project project) {
-        if (projectService.findProject(project.getId()) != null) {
+        if (project.getId() != null && projectService.findProject(project.getId()) != null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 

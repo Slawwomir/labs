@@ -153,9 +153,12 @@ public class IssueResource {
         List<Link> links = new ArrayList<>();
         links.add(getSelfLinkForIssue(uriInfo, issueId));
         links.add(getDeleteLinkForIssue(uriInfo, issueId));
-        links.add(getReporterLink(uriInfo, issue.getReporterId()));
         links.add(getProjectLink(uriInfo, issue.getProjectId()));
-        if(issue.getAssigneeId() != null) {
+
+        if (issue.getReporterId() != null) {
+            links.add(getReporterLink(uriInfo, issue.getReporterId()));
+        }
+        if (issue.getAssigneeId() != null) {
             links.add(getAssigneeLink(uriInfo, issue.getAssigneeId()));
         }
 

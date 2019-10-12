@@ -1,6 +1,8 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {IssueService} from "../issue.service";
 import {Issue} from "../issue";
+import {Project} from "../project";
+import {ProjectService} from "../project.service";
 
 @Component({
   selector: 'app-issue-edit',
@@ -17,9 +19,11 @@ export class IssueEditComponent implements OnInit {
 
   statuses: string[];
   types: string[];
+  projects: Project[];
 
   constructor(
-    private issueService: IssueService
+    private issueService: IssueService,
+    private projectService: ProjectService
   ) {
   }
 
@@ -31,6 +35,10 @@ export class IssueEditComponent implements OnInit {
 
     if (!this.types) {
       this.getIssueTypes();
+    }
+
+    if (!this.projects) {
+      this.getProjects();
     }
   }
 
@@ -58,5 +66,10 @@ export class IssueEditComponent implements OnInit {
   private getIssueTypes() {
     this.issueService.getIssueTypes()
       .subscribe(issueTypes => this.types = issueTypes);
+  }
+
+  private getProjects() {
+    this.projectService.getProjects()
+      .subscribe(projects => this.projects = projects);
   }
 }
