@@ -8,7 +8,7 @@ CREATE TABLE PROJECT
 (
     id               INT PRIMARY KEY AUTO_INCREMENT,
     name             VARCHAR(255) NOT NULL,
-    project_owner_id INT,
+    project_owner_id INT          NOT NULL,
     foreign key (project_owner_id) references USER (id)
 );
 
@@ -16,7 +16,7 @@ CREATE TABLE ISSUE
 (
     id          INT PRIMARY KEY AUTO_INCREMENT,
     name        VARCHAR(255) NOT NULL,
-    reporter_id INT,
+    reporter_id INT          NOT NULL,
     assignee_id INT,
     project_id  INT          NOT NULL,
     type        VARCHAR(255),

@@ -42,7 +42,7 @@ public class ProjectDTO {
     public ProjectDTO(Project project) {
         this.id = project.getId();
         this.name = project.getName();
-        this.projectOwnerId = project.getProjectOwner().getId();
+        this.projectOwnerId = project.getProjectOwner() == null ? null : project.getProjectOwner().getId();
         this.links = List.of();
     }
 }

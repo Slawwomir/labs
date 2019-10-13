@@ -24,7 +24,8 @@ import java.io.Serializable;
 @Setter
 @NamedQueries({
         @NamedQuery(name = "Issue.findAll", query = "SELECT i FROM Issue i"),
-        @NamedQuery(name = "Issue.findByProjectId", query = "SELECT i FROM Issue i WHERE i.project.id = ?1")
+        @NamedQuery(name = "Issue.findByProjectId", query = "SELECT i FROM Issue i WHERE i.project.id = ?1"),
+        @NamedQuery(name = "Issue.findByReporterId", query = "SELECT i FROM Issue i WHERE i.reporter.id = ?1")
 })
 public class Issue implements Serializable {
 
@@ -35,6 +36,7 @@ public class Issue implements Serializable {
     @NotNull
     private String name;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "reporter_id")
     private User reporter;

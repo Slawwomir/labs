@@ -39,6 +39,11 @@ public class IssueService {
     }
 
     @Transactional
+    public List<Issue> findIssuesByReporterId(Long reporterId) {
+        return entityManager.createNamedQuery("Issue.findByReporterId", Issue.class).setParameter(1, reporterId).getResultList();
+    }
+
+    @Transactional
     public synchronized Issue saveIssue(Issue issue) {
         if (issue.getId() != null) {
             entityManager.merge(issue);

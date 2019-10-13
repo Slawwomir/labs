@@ -3,6 +3,8 @@ export class Issue {
   type: string;
   status: string;
   projectId: number;
+  assigneeId: number;
+  reporterId: number;
   name: string;
   description: string;
 }

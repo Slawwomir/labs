@@ -4,6 +4,7 @@ import {ProjectService} from "../project.service";
 import {Issue} from "../issue";
 import {IssueService} from "../issue.service";
 import {Location} from "@angular/common";
+import {Auth} from "../utils/auth";
 
 @Component({
   selector: 'app-issue-list',
@@ -36,7 +37,13 @@ export class IssueListComponent implements OnInit {
   }
 
   add(issueName: string): void {
-    this.issueService.createIssue({name: issueName, projectId: this.projectId} as Issue)
+    this.issueService.createIssue({
+      name: issueName,
+      projectId: this.projectId,
+      reporterId: Auth.getCurrentUser().id,
+      status: "OPEN",
+      type: "TASK"
+    } as Issue)
       .subscribe(issue => this.issues.push(issue));
   }
 

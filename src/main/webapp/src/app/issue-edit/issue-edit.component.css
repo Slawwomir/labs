@@ -31,3 +31,7 @@ button:disabled {
   color: #ccc;
   cursor: auto;
 }
+.error-text {
+  color: #D8000C;
+  background-color: #FFD2D2;
+}

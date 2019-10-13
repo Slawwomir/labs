@@ -47,9 +47,9 @@ public class ProjectService {
         project.setId(projectDTO.getId());
         project.setName(projectDTO.getName());
 
-        User projectOwner = new User();
-        projectOwner.setId(projectDTO.getProjectOwnerId());
-        project.setProjectOwner(projectOwner);
+        if(projectDTO.getProjectOwnerId() != null) {
+            project.setProjectOwner(entityManager.find(User.class, projectDTO.getProjectOwnerId()));
+        }
 
         return saveProject(project);
     }

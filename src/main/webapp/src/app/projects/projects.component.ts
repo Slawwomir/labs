@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {ProjectService} from "../project.service";
 import {Project} from "../project";
+import {AppComponent} from "../app.component";
+import {Auth} from "../utils/auth";
 
 @Component({
   selector: 'app-projects',
@@ -26,9 +28,9 @@ export class ProjectsComponent implements OnInit {
 
   add(name: string): void {
     name = name.trim();
-    if(!name) return;
+    if (!name) return;
 
-    this.projectService.createProject({name} as Project)
+    this.projectService.createProject({name, projectOwnerId: Auth.getCurrentUser().id} as Project)
       .subscribe(project => {
         this.projects.push(project)
       })

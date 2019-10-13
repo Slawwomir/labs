@@ -5,7 +5,7 @@
       <label>Name:
         <input [(ngModel)]="issue.name" name="name" placeholder="name"/>
       </label>
-        <div *ngIf="errors['name']">{{errors['name']}}</div>
+        <div class="error-text" *ngIf="errors['name']">{{errors['name']}}</div>
     </div>
 
     <div class="form-group">
@@ -14,6 +14,7 @@
           <option *ngFor="let type of types" [value]="type">{{type}}</option>
         </select>
       </label>
+      <div class="error-text" *ngIf="errors['type']">{{errors['type']}}</div>
     </div>
 
     <div class="form-group">
@@ -22,6 +23,17 @@
           <option *ngFor="let opt of statuses" [value]="opt">{{opt}}</option>
         </select>
       </label>
+      <div class="error-text" *ngIf="errors['status']">{{errors['status']}}</div>
+    </div>
+
+    <div class="form-group">
+      <label>Assignee:
+        <select [(ngModel)]="issue.assigneeId" name="assigneeId">
+          <option [value]="null">Unassigned</option>
+          <option *ngFor="let opt of users" [value]="opt.id">{{opt.username}}</option>
+        </select>
+      </label>
+      <div class="error-text" *ngIf="errors['status']">{{errors['status']}}</div>
     </div>
 
     <div class="form-group">
