@@ -3,18 +3,14 @@ package service;
 import repository.entities.User;
 import rest.dto.user.UserDTO;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import javax.ejb.Stateful;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.List;
 
-@ApplicationScoped
+@Stateful
 public class UserService {
-
-    @Inject
-    private IssueService issueService;
 
     @PersistenceContext
     private EntityManager entityManager;

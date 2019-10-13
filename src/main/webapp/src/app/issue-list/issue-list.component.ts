@@ -16,6 +16,8 @@ export class IssueListComponent implements OnInit {
   @Input()
   projectId: number;
   issues: Issue[];
+  statuses: string[];
+  filterByStatus: String;
 
   isFullCreate: boolean;
   newIssue: Issue;
@@ -28,12 +30,20 @@ export class IssueListComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.filterByStatus = "";
     this.getIssues();
+    this.getStatuses();
   }
 
   private getIssues(): void {
-    this.projectService.getIssues({id: this.projectId} as Project)
+    const filters = (this.filterByStatus && this.filterByStatus != "null") ? {status: this.filterByStatus} : {};
+    this.projectService.getIssues({id: this.projectId} as Project, filters)
       .subscribe(issues => this.issues = issues);
+  }
+
+  private getStatuses(): void {
+    this.issueService.getStatuses()
+      .subscribe(statuses => this.statuses = statuses);
   }
 
   add(issueName: string): void {

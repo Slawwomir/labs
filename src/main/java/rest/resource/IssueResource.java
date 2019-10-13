@@ -46,10 +46,11 @@ public class IssueResource {
 
     @GET
     public Response getIssues(@Context UriInfo uriInfo, @QueryParam("start") int start, @QueryParam("size") @DefaultValue("2") int size) {
-        List<IssueDTO> projects = issueService.findAllIssues().stream().map(IssueDTO::new).collect(Collectors.toList());
-        List<Link> links = getLinksForIssues(projects, uriInfo, start, size);
-        List<IssueDTO> projectsSubList = projects.subList(start, Math.min(start + size, projects.size()));
-        IssuesDTO issuesEntity = new IssuesDTO(projectsSubList, links);
+        List<IssueDTO> issuesDTO = issueService.findAllIssues().stream().map(IssueDTO::new).collect(Collectors.toList());
+        List<Link> links = getLinksForIssues(issuesDTO, uriInfo, start, size);
+        List<IssueDTO> issues = issuesDTO.subList(start, Math.min(start + size, issuesDTO.size()));
+        issues.forEach(issue -> setLinksForIssue(uriInfo, issue));
+        IssuesDTO issuesEntity = new IssuesDTO(issues, links);
 
         return Response.ok(issuesEntity).build();
     }
@@ -121,7 +122,7 @@ public class IssueResource {
         return Response.ok(issueTypes).build();
     }
 
-    private List<Link> getLinksForIssues(List<IssueDTO> projects, UriInfo uriInfo, int start, int size) {
+    private List<Link> getLinksForIssues(List<IssueDTO> issuesDTO, UriInfo uriInfo, int start, int size) {
         UriBuilder pathBuilder = uriInfo.getAbsolutePathBuilder();
         pathBuilder.queryParam("start", "{start}");
         pathBuilder.queryParam("size", "{size}");
@@ -129,7 +130,7 @@ public class IssueResource {
         List<Link> links = new ArrayList<>();
         links.add(Link.fromUri(uriInfo.getRequestUri()).rel("self").build());
 
-        if (start + size < projects.size()) {
+        if (start + size < issuesDTO.size()) {
             int next = start + size;
             URI nextUri = pathBuilder.clone().build(next, size);
             Link nextLink = Link.fromUri(nextUri)

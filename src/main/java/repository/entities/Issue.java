@@ -25,7 +25,8 @@ import java.io.Serializable;
 @NamedQueries({
         @NamedQuery(name = "Issue.findAll", query = "SELECT i FROM Issue i"),
         @NamedQuery(name = "Issue.findByProjectId", query = "SELECT i FROM Issue i WHERE i.project.id = ?1"),
-        @NamedQuery(name = "Issue.findByReporterId", query = "SELECT i FROM Issue i WHERE i.reporter.id = ?1")
+        @NamedQuery(name = "Issue.findByReporterId", query = "SELECT i FROM Issue i WHERE i.reporter.id = ?1"),
+        @NamedQuery(name = "Issue.findByProjectIdAndStatus", query = "SELECT i FROM Issue i where i.project.id = ?1 and i.status = ?2")
 })
 public class Issue implements Serializable {
 

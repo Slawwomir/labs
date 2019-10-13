@@ -1,5 +1,7 @@
 package rest.resource;
 
+import domain.issue.IssueStatus;
+import repository.entities.Issue;
 import repository.entities.Project;
 import rest.dto.issue.IssueDTO;
 import rest.dto.issue.IssuesDTO;
@@ -106,14 +108,20 @@ public class ProjectResource {
 
     @GET
     @Path("{projectId}/issues")
-    public Response getProjectIssues(@Context UriInfo uriInfo, @PathParam("projectId") Long projectId) {
+    public Response getProjectIssues(@Context UriInfo uriInfo, @PathParam("projectId") Long projectId, @QueryParam("status") IssueStatus status) {
         Project project = projectService.findProject(projectId);
 
         if (project == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
+        List<Issue> results;
+        if (status != null) {
+            results = issueService.findIssuesByProjectIdAndStatus(projectId, status);
+        } else {
+            results = issueService.findIssuesByProjectId(projectId);
+        }
 
-        List<IssueDTO> issues = issueService.findIssuesByProjectId(projectId).stream().map(IssueDTO::new).collect(Collectors.toList());
+        List<IssueDTO> issues = results.stream().map(IssueDTO::new).collect(Collectors.toList());
         issues.forEach(issue -> IssueResource.setLinksForIssue(uriInfo, issue));
 
         List<Link> link = List.of(Link.fromUri(uriInfo.getRequestUri()).rel("self").build());

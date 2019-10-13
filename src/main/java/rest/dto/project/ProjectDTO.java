@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import repository.entities.Project;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.ws.rs.core.Link;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -23,8 +25,12 @@ public class ProjectDTO {
 
     @XmlElement
     private Long id;
+
     @XmlElement
+    @NotNull(message = "project name must be set")
+    @Size(min = 2, max = 10, message = "Project name must be longer than 1 character and shorter than 11 characters")
     private String name;
+
     @XmlElement
     private Long projectOwnerId;
 

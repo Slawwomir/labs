@@ -4,6 +4,7 @@ import {Location} from "@angular/common";
 
 import {ProjectService} from "../project.service";
 import {Project} from "../project";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-project-detail',
@@ -14,6 +15,7 @@ export class ProjectDetailComponent implements OnInit {
 
   project: Project;
   editMode: boolean;
+  errors: string[];
 
   constructor(
     private route: ActivatedRoute,
@@ -24,6 +26,7 @@ export class ProjectDetailComponent implements OnInit {
 
   ngOnInit() {
     this.getProject();
+    this.errors = [];
   }
 
   getProject(): void {
@@ -38,11 +41,26 @@ export class ProjectDetailComponent implements OnInit {
 
   save(): void {
     this.projectService.updateProject(this.project)
-      .subscribe();
+      .subscribe(_ => {
+      }, error => {
+        this.mapErrors(error);
+      });
     this.editMode = false;
   }
 
   edit(): void {
     this.editMode = true;
+  }
+
+
+  private mapErrors(error) {
+    if (error instanceof HttpErrorResponse) {
+      const errorMessages = [];
+      error.error.parameterViolations.forEach(err => {
+        errorMessages[err.path.split(".")[2]] = err.message;
+      });
+
+      this.errors = errorMessages;
+    }
   }
 }

@@ -1,3 +1,11 @@
+<div>
+  <label> Filter by status:
+    <select [(ngModel)]="filterByStatus" (ngModelChange)="getIssues()">
+      <option [value]="null">All</option>
+      <option *ngFor="let status of statuses" [value]="status">{{status}}</option>
+    </select>
+  </label>
+</div>
 <ul class="issues">
   <li *ngFor="let issue of issues">
     <a routerLink="/issue/{{issue.id}}">

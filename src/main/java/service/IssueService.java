@@ -97,4 +97,11 @@ public class IssueService {
 
         return saveIssue(issue);
     }
+
+    public List<Issue> findIssuesByProjectIdAndStatus(Long projectId, IssueStatus status) {
+        return entityManager.createNamedQuery("Issue.findByProjectIdAndStatus", Issue.class)
+                .setParameter(1, projectId)
+                .setParameter(2, status)
+                .getResultList();
+    }
 }

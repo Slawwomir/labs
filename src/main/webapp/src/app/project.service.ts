@@ -67,8 +67,8 @@ export class ProjectService {
       )
   }
 
-  getIssues(project: Project): Observable<Issue[]> {
-    return this.httpClient.get(`${this.getProjectsUrl()}/${project.id}/issues`)
+  getIssues(project: Project, filters): Observable<Issue[]> {
+    return this.httpClient.get(`${this.getProjectsUrl()}/${project.id}/issues`, {params: filters})
       .pipe(
         map(response => response["issues"]),
         tap(_ => this.log(`get project issues id=${project.id}`)),

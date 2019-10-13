@@ -5,7 +5,6 @@ import repository.entities.User;
 import rest.dto.project.ProjectDTO;
 
 import javax.ejb.Stateful;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
@@ -17,9 +16,6 @@ public class ProjectService {
 
     @PersistenceContext
     private EntityManager entityManager;
-
-    @Inject
-    private IssueService issueService;
 
     @Transactional
     public List<Project> findAllProjects() {

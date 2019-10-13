@@ -35,6 +35,9 @@ public class UserResource {
     @GET
     public Response getUsers(@Context UriInfo uriInfo) {
         List<UserDTO> allUsers = userService.findAllUsers().stream().map(UserDTO::new).collect(Collectors.toList());
+        allUsers.forEach(user -> {
+            user.setLinks(List.of(Link.fromUri(uriInfo.getRequestUriBuilder().path(user.getId().toString()).build()).rel("self").build()));
+        });
         List<Link> links = List.of(Link.fromUri(uriInfo.getRequestUri()).rel("self").build());
 
         return Response.ok(new UsersDTO(allUsers, links)).build();
