@@ -1,4 +1,4 @@
-package rest.model.issue;
+package domain.issue;
 
 
 public enum IssueType {

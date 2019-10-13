@@ -1,4 +1,4 @@
-package rest.model.project;
+package rest.dto.issue;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,10 +17,10 @@ import java.util.List;
 @Getter
 @Setter
 @XmlRootElement
-public class Projects {
+public class IssuesDTO {
 
     @XmlElementRef
-    private List<Project> projects;
+    private List<IssueDTO> issues;
 
     @XmlElement
     @XmlJavaTypeAdapter(Link.JaxbAdapter.class)

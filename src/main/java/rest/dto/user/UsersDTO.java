@@ -1,4 +1,4 @@
-package rest.model.user;
+package rest.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,10 +17,10 @@ import java.util.List;
 @Getter
 @Setter
 @XmlRootElement
-public class Users {
+public class UsersDTO {
 
     @XmlElementRef
-    private List<User> users;
+    private List<UserDTO> users;
 
     @XmlElement
     @XmlJavaTypeAdapter(Link.JaxbAdapter.class)

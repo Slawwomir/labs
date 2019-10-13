@@ -1,9 +1,10 @@
 package rest.resource;
 
-import rest.model.issue.Issue;
-import rest.model.issue.IssueStatus;
-import rest.model.issue.IssueType;
-import rest.model.issue.Issues;
+import repository.entities.Issue;
+import rest.dto.issue.IssueDTO;
+import domain.issue.IssueStatus;
+import domain.issue.IssueType;
+import rest.dto.issue.IssuesDTO;
 import service.IssueService;
 import service.ProjectService;
 
@@ -28,6 +29,7 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("issue")
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,26 +45,26 @@ public class IssueResource {
 
     @GET
     public Response getIssues(@Context UriInfo uriInfo, @QueryParam("start") int start, @QueryParam("size") @DefaultValue("2") int size) {
-        List<Issue> projects = issueService.findAllIssues();
+        List<IssueDTO> projects = issueService.findAllIssues().stream().map(IssueDTO::new).collect(Collectors.toList());
         List<Link> links = getLinksForIssues(projects, uriInfo, start, size);
-        List<Issue> projectsSubList = projects.subList(start, Math.min(start + size, projects.size()));
-        Issues issuesEntity = new Issues(projectsSubList, links);
+        List<IssueDTO> projectsSubList = projects.subList(start, Math.min(start + size, projects.size()));
+        IssuesDTO issuesEntity = new IssuesDTO(projectsSubList, links);
 
         return Response.ok(issuesEntity).build();
     }
 
     @POST
-    public Response addIssue(Issue issue) {
+    public Response addIssue(IssueDTO issue) {
         if (issue.getProjectId() == null || projectService.findProject(issue.getProjectId()) == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         Issue newIssue = issueService.saveIssue(issue);
-        return Response.ok(newIssue).build();
+        return Response.ok(new IssueDTO(newIssue)).build();
     }
 
     @PUT
-    public Response updateIssue(Issue issue) {
+    public Response updateIssue(IssueDTO issue) {
         if (issue == null || issue.getProjectId() == null || issue.getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -73,7 +75,7 @@ public class IssueResource {
 
         Issue updatedIssue = issueService.saveIssue(issue);
 
-        return Response.ok(updatedIssue).build();
+        return Response.ok(new IssueDTO(updatedIssue)).build();
     }
 
     @DELETE
@@ -96,9 +98,10 @@ public class IssueResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        setLinksForIssue(uriInfo, issue);
+        IssueDTO issueDTO = new IssueDTO(issue);
+        setLinksForIssue(uriInfo, issueDTO);
 
-        return Response.ok(issue).build();
+        return Response.ok(issueDTO).build();
     }
 
     @GET
@@ -117,7 +120,7 @@ public class IssueResource {
         return Response.ok(issueTypes).build();
     }
 
-    private List<Link> getLinksForIssues(List<Issue> projects, UriInfo uriInfo, int start, int size) {
+    private List<Link> getLinksForIssues(List<IssueDTO> projects, UriInfo uriInfo, int start, int size) {
         UriBuilder pathBuilder = uriInfo.getAbsolutePathBuilder();
         pathBuilder.queryParam("start", "{start}");
         pathBuilder.queryParam("size", "{size}");
@@ -148,7 +151,7 @@ public class IssueResource {
         return links;
     }
 
-    public static void setLinksForIssue(@Context UriInfo uriInfo, Issue issue) {
+    public static void setLinksForIssue(@Context UriInfo uriInfo, IssueDTO issue) {
         Long issueId = issue.getId();
         List<Link> links = new ArrayList<>();
         links.add(getSelfLinkForIssue(uriInfo, issueId));

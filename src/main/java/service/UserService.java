@@ -1,13 +1,14 @@
 package service;
 
-import rest.model.user.User;
+import repository.entities.User;
+import rest.dto.user.UserDTO;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.ArrayList;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class UserService {
@@ -15,39 +16,46 @@ public class UserService {
     @Inject
     private IssueService issueService;
 
-    private final List<User> users = new ArrayList<>();
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    @PostConstruct
-    public void init() {
-        users.add(new User(1L, "Andriu", null));
-        users.add(new User(2L, "Krystyna", null));
-    }
-
+    @Transactional
     public List<User> findAllUsers() {
-        return users.stream().map(User::new).collect(Collectors.toList());
+        return entityManager.createNamedQuery("User.findAll", User.class).getResultList();
     }
 
+    @Transactional
     public User findUser(Long id) {
-        return users.stream().filter(p -> p.getId().equals(id)).findFirst().orElse(null);
+        return entityManager.find(User.class, id);
     }
 
+    @Transactional
     public synchronized User saveUser(User user) {
         if (user.getId() != null) {
-            users.removeIf(p -> p.getId().equals(user.getId()));
-            users.add(user);
+            entityManager.merge(user);
         } else {
-            user.setId(users.stream().mapToLong(User::getId).max().orElse(0) + 1);
-            users.add(new User(user));
+            entityManager.persist(user);
         }
 
         return user;
     }
 
+    @Transactional
     public void removeUser(User user) {
-        removeUser(user.getId());
+        entityManager.remove(user);
     }
 
     public void removeUser(Long userId) {
-        users.removeIf(p -> p.getId().equals(userId));
+        User user = new User();
+        user.setId(userId);
+        removeUser(user);
+    }
+
+    public User saveUser(UserDTO userDTO) {
+        User user = new User();
+        user.setId(userDTO.getId());
+        user.setName(userDTO.getUsername());
+
+        return saveUser(user);
     }
 }

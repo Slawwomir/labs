@@ -1,9 +1,10 @@
 package rest.resource;
 
-import rest.model.issue.Issue;
-import rest.model.issue.Issues;
-import rest.model.project.Project;
-import rest.model.project.Projects;
+import repository.entities.Project;
+import rest.dto.issue.IssueDTO;
+import rest.dto.issue.IssuesDTO;
+import rest.dto.project.ProjectDTO;
+import rest.dto.project.ProjectsDTO;
 import service.IssueService;
 import service.ProjectService;
 
@@ -28,6 +29,7 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("project")
 @Produces(MediaType.APPLICATION_JSON)
@@ -47,37 +49,37 @@ public class ProjectResource {
             @QueryParam("size") @DefaultValue("2") int size,
             @Context UriInfo uriInfo
     ) {
-        if(size <= 0) {
+        if (size <= 0) {
             size = Integer.MAX_VALUE;
         }
 
-        List<Project> projects = projectService.findAllProjects();
+        List<ProjectDTO> projects = projectService.findAllProjects().stream().map(ProjectDTO::new).collect(Collectors.toList());
         List<Link> links = getLinksForProjects(projects, uriInfo, start, size);
-        List<Project> projectsSubList = projects.subList(start, Math.min(start + size, projects.size()));
+        List<ProjectDTO> projectsSubList = projects.subList(start, Math.min(start + size, projects.size()));
         projectsSubList.forEach(project -> setLinksForProject(uriInfo, project));
-        Projects projectsEntity = new Projects(projectsSubList, links);
+        ProjectsDTO projectsEntity = new ProjectsDTO(projectsSubList, links);
 
         return Response.ok(projectsEntity).links(links.toArray(Link[]::new)).build();
     }
 
     @POST
-    public Response addProject(Project project) {
+    public Response addProject(ProjectDTO project) {
         if (project.getId() != null && projectService.findProject(project.getId()) != null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         Project newProject = projectService.saveProject(project);
-        return Response.ok(newProject).build();
+        return Response.ok(new ProjectDTO(newProject)).build();
     }
 
     @PUT
-    public Response updateProject(Project project) {
+    public Response updateProject(ProjectDTO project) {
         if (projectService.findProject(project.getId()) == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         Project updatedProject = projectService.saveProject(project);
-        return Response.ok(updatedProject).build();
+        return Response.ok(new ProjectDTO(updatedProject)).build();
     }
 
     @DELETE
@@ -97,8 +99,9 @@ public class ProjectResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        setLinksForProject(uriInfo, project);
-        return Response.ok(project).build();
+        ProjectDTO projectDTO = new ProjectDTO(project);
+        setLinksForProject(uriInfo, projectDTO);
+        return Response.ok(projectDTO).build();
     }
 
     @GET
@@ -110,14 +113,14 @@ public class ProjectResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        List<Issue> issues = issueService.findIssuesByProjectId(projectId);
+        List<IssueDTO> issues = issueService.findIssuesByProjectId(projectId).stream().map(IssueDTO::new).collect(Collectors.toList());
         issues.forEach(issue -> IssueResource.setLinksForIssue(uriInfo, issue));
 
         List<Link> link = List.of(Link.fromUri(uriInfo.getRequestUri()).rel("self").build());
-        return Response.ok(new Issues(issues, link)).build();
+        return Response.ok(new IssuesDTO(issues, link)).build();
     }
 
-    private List<Link> getLinksForProjects(List<Project> projects, UriInfo uriInfo, int start, int size) {
+    private List<Link> getLinksForProjects(List<ProjectDTO> projects, UriInfo uriInfo, int start, int size) {
         UriBuilder pathBuilder = uriInfo.getAbsolutePathBuilder();
         pathBuilder.queryParam("start", "{start}");
         pathBuilder.queryParam("size", "{size}");
@@ -148,7 +151,7 @@ public class ProjectResource {
         return links;
     }
 
-    private static void setLinksForProject(@Context UriInfo uriInfo, Project project) {
+    private static void setLinksForProject(@Context UriInfo uriInfo, ProjectDTO project) {
         Long projectId = project.getId();
         List<Link> links = new ArrayList<>();
         links.add(getSelfLinkForProject(uriInfo, projectId));

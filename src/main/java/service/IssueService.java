@@ -1,60 +1,64 @@
 package service;
 
-import rest.model.issue.Issue;
-import rest.model.issue.IssueStatus;
-import rest.model.issue.IssueType;
+import repository.entities.Issue;
+import domain.issue.IssueStatus;
+import domain.issue.IssueType;
+import repository.entities.Project;
+import rest.dto.issue.IssueDTO;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import java.util.ArrayList;
+import javax.ejb.Stateful;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
-@ApplicationScoped
+@Stateful
 public class IssueService {
 
-    private final List<Issue> issues = new ArrayList<>();
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    @PostConstruct
-    public void init() {
-        issues.add(new Issue(1L, IssueType.TASK, IssueStatus.OPEN, "Zrób labkę 1", "No pierwsza to jest taka spoko, więc ją zrób", 1L, 1L, null, null));
-        issues.add(new Issue(2L, IssueType.TASK, IssueStatus.OPEN, "Zrób labkę 1", "No pierwsza to jest taka spoko, więc ją zrób", 1L, 1L, null, null));
-        issues.add(new Issue(3L, IssueType.TASK, IssueStatus.OPEN, "Zrób labkę 1", "No pierwsza to jest taka spoko, więc ją zrób", 1L, 1L, null, null));
-        issues.add(new Issue(4L, IssueType.BUG, IssueStatus.OPEN, "Nie działa strona", "Jak się wejdzie, to nie działa. Może nie wchodzić?", 2L, 1L, null, null));
-        issues.add(new Issue(5L, IssueType.BUG, IssueStatus.OPEN, "Nie działa strona", "Jak się wejdzie, to nie działa. Może nie wchodzić?", 2L, 1L, null, null));
-    }
+    @Inject
+    private UserService userService;
 
+    @Transactional
     public List<Issue> findAllIssues() {
-        return issues.stream().map(Issue::new).collect(Collectors.toList());
+        return entityManager.createNamedQuery("Issue.findAll", Issue.class).getResultList();
     }
 
+    @Transactional
     public Issue findIssue(Long id) {
-        return issues.stream().filter(i -> i.getId().equals(id)).findFirst().orElse(null);
+        return entityManager.find(Issue.class, id);
     }
 
+    @Transactional
     public List<Issue> findIssuesByProjectId(Long projectId) {
-        return issues.stream().filter(i -> i.getProjectId().equals(projectId)).collect(Collectors.toList());
+        return entityManager.createNamedQuery("Issue.findByProjectId", Issue.class).setParameter(1, projectId).getResultList();
     }
 
+    @Transactional
     public synchronized Issue saveIssue(Issue issue) {
         if (issue.getId() != null) {
-            issues.removeIf(i -> i.getId().equals(issue.getId()));
-            issues.add(new Issue(issue));
+            entityManager.merge(issue);
         } else {
-            issue.setId(issues.stream().mapToLong(Issue::getId).max().orElse(0) + 1);
-            issues.add(new Issue(issue));
+            entityManager.persist(issue);
         }
 
         return issue;
     }
 
+    @Transactional
     public void removeIssue(Issue issue) {
-        removeIssue(issue.getId());
+        Issue toRemove = entityManager.contains(issue) ? issue : entityManager.merge(issue);
+        entityManager.remove(toRemove);
     }
 
     public void removeIssue(Long issueId) {
-        issues.removeIf(issue -> issue.getId().equals(issueId));
+        Issue issue = new Issue();
+        issue.setId(issueId);
+        removeIssue(issue);
     }
 
     public List<IssueStatus> getIssueStatuses() {
@@ -63,5 +67,29 @@ public class IssueService {
 
     public List<IssueType> getIssueTypes() {
         return List.of(IssueType.values());
+    }
+
+    public Issue saveIssue(IssueDTO issueDTO) {
+        Issue issue = new Issue();
+        issue.setId(issueDTO.getId());
+
+        if (issueDTO.getProjectId() != null) {
+            issue.setProject(entityManager.find(Project.class, issueDTO.getProjectId()));
+        }
+
+        if (issueDTO.getAssigneeId() != null) {
+            issue.setAssignee(userService.findUser(issueDTO.getAssigneeId()));
+        }
+
+        if (issueDTO.getReporterId() != null) {
+            issue.setReporter(userService.findUser(issueDTO.getReporterId()));
+        }
+
+        issue.setDescription(issueDTO.getDescription());
+        issue.setName(issueDTO.getName());
+        issue.setStatus(issueDTO.getStatus());
+        issue.setType(issueDTO.getType());
+
+        return saveIssue(issue);
     }
 }

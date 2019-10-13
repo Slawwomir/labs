@@ -1,14 +1,27 @@
 package rest.resource;
 
-import rest.model.user.User;
-import rest.model.user.Users;
+import repository.entities.User;
+import rest.dto.user.UserDTO;
+import rest.dto.user.UsersDTO;
 import service.UserService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Link;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
@@ -21,10 +34,10 @@ public class UserResource {
 
     @GET
     public Response getUsers(@Context UriInfo uriInfo) {
-        List<User> allUsers = userService.findAllUsers();
+        List<UserDTO> allUsers = userService.findAllUsers().stream().map(UserDTO::new).collect(Collectors.toList());
         List<Link> links = List.of(Link.fromUri(uriInfo.getRequestUri()).rel("self").build());
 
-        return Response.ok(new Users(allUsers, links)).build();
+        return Response.ok(new UsersDTO(allUsers, links)).build();
     }
 
     @GET
@@ -36,25 +49,27 @@ public class UserResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        user.setLinks(List.of(
+        UserDTO userDTO = new UserDTO(user);
+
+        userDTO.setLinks(List.of(
                 Link.fromUri(uriInfo.getRequestUri()).rel("self").build(),
                 Link.fromUri(uriInfo.getRequestUri()).rel("delete").param("method", "DELETE").build()
         ));
-        return Response.ok(user).build();
+        return Response.ok(userDTO).build();
     }
 
     @POST
-    public Response addUser(User user) {
+    public Response addUser(UserDTO user) {
         if (user.getId() != null && userService.findUser(user.getId()) != null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         User newUser = userService.saveUser(user);
-        return Response.ok(newUser).build();
+        return Response.ok(new UserDTO(newUser)).build();
     }
 
     @PUT
-    public Response updateUser(User user) {
+    public Response updateUser(UserDTO user) {
         if (user == null || user.getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -65,7 +80,7 @@ public class UserResource {
 
         User updatedUser = userService.saveUser(user);
 
-        return Response.ok(updatedUser).build();
+        return Response.ok(new UserDTO(updatedUser)).build();
     }
 
     @DELETE
