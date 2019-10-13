@@ -10,6 +10,7 @@ import service.ProjectService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -54,7 +55,7 @@ public class IssueResource {
     }
 
     @POST
-    public Response addIssue(IssueDTO issue) {
+    public Response addIssue(@Valid IssueDTO issue) {
         if (issue.getProjectId() == null || projectService.findProject(issue.getProjectId()) == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -64,7 +65,7 @@ public class IssueResource {
     }
 
     @PUT
-    public Response updateIssue(IssueDTO issue) {
+    public Response updateIssue(@Valid IssueDTO issue) {
         if (issue == null || issue.getProjectId() == null || issue.getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }

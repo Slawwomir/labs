@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import repository.entities.Issue;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.ws.rs.core.Link;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -22,20 +24,31 @@ import java.util.List;
 @Setter
 @XmlRootElement
 public class IssueDTO {
+
     @XmlElement
     private Long id;
+
     @XmlElement
+    @NotNull(message = "issue type must be set")
     private IssueType type;
+
     @XmlElement
+    @NotNull(message = "issue status must be set")
     private IssueStatus status;
+
     @XmlElement
+    @Size(min = 2, max = 20, message = "issue name must be between 2 and 20 characters")
     private String name;
+
     @XmlElement
     private String description;
+
     @XmlElement
     private Long projectId;
+
     @XmlElement
     private Long reporterId;
+
     @XmlElement
     private Long assigneeId;
 

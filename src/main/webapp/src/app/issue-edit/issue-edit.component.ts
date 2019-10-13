@@ -3,6 +3,7 @@ import {IssueService} from "../issue.service";
 import {Issue} from "../issue";
 import {Project} from "../project";
 import {ProjectService} from "../project.service";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-issue-edit',
@@ -20,6 +21,7 @@ export class IssueEditComponent implements OnInit {
   statuses: string[];
   types: string[];
   projects: Project[];
+  errors: string[];
 
   constructor(
     private issueService: IssueService,
@@ -28,6 +30,7 @@ export class IssueEditComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.errors = [];
     this.issue = Object.assign({}, this.issue);
     if (!this.statuses) {
       this.getStatuses();
@@ -42,18 +45,29 @@ export class IssueEditComponent implements OnInit {
     }
   }
 
-  save(): void {
+  onSubmit(): void {
     if(this.issue.id) {
       this.issueService.updateIssue(this.issue)
         .subscribe(issue => {
           this.issue = issue;
           this.onSave.emit(issue);
+        }, error => {
+
         });
     } else {
       this.issueService.createIssue(this.issue)
         .subscribe(issue => {
           this.issue = issue;
           this.onSave.emit(issue);
+        }, error => {
+          if (error instanceof HttpErrorResponse) {
+            const errorMessages = [];
+            error.error.parameterViolations.forEach(err => {
+              errorMessages[err.path.split(".")[2]] = err.message;
+            });
+
+            this.errors = errorMessages;
+          }
         });
     }
   }
