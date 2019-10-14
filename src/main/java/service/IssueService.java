@@ -6,7 +6,7 @@ import domain.issue.IssueType;
 import repository.entities.Project;
 import rest.dto.issue.IssueDTO;
 
-import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -14,7 +14,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 
-@Stateful
+@Stateless
 public class IssueService {
 
     @PersistenceContext
@@ -54,10 +54,6 @@ public class IssueService {
         }
 
         return issue;
-    }
-
-    public void removeIssue(Issue issue) {
-        removeIssue(issue.getId());
     }
 
     @Transactional

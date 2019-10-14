@@ -3,13 +3,13 @@ package service;
 import repository.entities.User;
 import rest.dto.user.UserDTO;
 
-import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.List;
 
-@Stateful
+@Stateless
 public class UserService {
 
     @PersistenceContext

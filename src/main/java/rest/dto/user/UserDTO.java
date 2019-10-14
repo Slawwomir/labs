@@ -1,9 +1,6 @@
 package rest.dto.user;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 import repository.entities.User;
 
 import javax.validation.constraints.Size;
@@ -15,10 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
+@Data
 @XmlRootElement
 public class UserDTO {
 

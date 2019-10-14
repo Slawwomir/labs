@@ -2,10 +2,7 @@ package rest.dto.issue;
 
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 import repository.entities.Issue;
 import rest.validation.annotations.ProjectExists;
 import rest.validation.annotations.UserExists;
@@ -20,10 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
+@Data
 @XmlRootElement
 public class IssueDTO {
 

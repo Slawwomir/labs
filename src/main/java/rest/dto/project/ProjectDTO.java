@@ -1,9 +1,6 @@
 package rest.dto.project;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 import repository.entities.Project;
 import rest.validation.annotations.UserExists;
 
@@ -17,10 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
+@Data
 @XmlRootElement
 public class ProjectDTO {
 

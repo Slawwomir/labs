@@ -13,10 +13,6 @@ public class ProjectValidator implements ConstraintValidator<ProjectExists, Long
     private ProjectService projectService;
 
     @Override
-    public void initialize(ProjectExists constraintAnnotation) {
-    }
-
-    @Override
     public boolean isValid(Long value, ConstraintValidatorContext context) {
         if (value == null) {
             return true;

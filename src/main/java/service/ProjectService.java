@@ -4,14 +4,13 @@ import repository.entities.Project;
 import repository.entities.User;
 import rest.dto.project.ProjectDTO;
 
-import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.List;
 
-
-@Stateful
+@Stateless
 public class ProjectService {
 
     @PersistenceContext

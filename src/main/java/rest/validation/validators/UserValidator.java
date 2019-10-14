@@ -13,11 +13,6 @@ public class UserValidator implements ConstraintValidator<UserExists, Long> {
     private UserService userService;
 
     @Override
-    public void initialize(UserExists constraintAnnotation) {
-
-    }
-
-    @Override
     public boolean isValid(Long value, ConstraintValidatorContext context) {
         if (value == null) {
             return true;
