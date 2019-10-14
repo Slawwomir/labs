@@ -3,6 +3,7 @@ package rest.dto.issue;
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import repository.entities.Issue;
 import rest.validation.annotations.ProjectExists;
 import rest.validation.annotations.UserExists;
@@ -18,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 @XmlRootElement
 public class IssueDTO {
 

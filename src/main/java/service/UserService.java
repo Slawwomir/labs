@@ -6,7 +6,6 @@ import rest.dto.user.UserDTO;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Stateless
@@ -15,12 +14,10 @@ public class UserService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Transactional
     public List<User> findAllUsers() {
         return entityManager.createNamedQuery("User.findAll", User.class).getResultList();
     }
 
-    @Transactional
     public User findUser(Long id) {
         if (id == null) {
             return null;
@@ -28,7 +25,6 @@ public class UserService {
         return entityManager.find(User.class, id);
     }
 
-    @Transactional
     public synchronized User saveUser(User user) {
         if (user.getId() != null) {
             entityManager.merge(user);
@@ -39,7 +35,6 @@ public class UserService {
         return user;
     }
 
-    @Transactional
     public void removeUser(Long userId) {
         entityManager.remove(findUser(userId));
     }

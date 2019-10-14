@@ -7,7 +7,6 @@ import rest.dto.project.ProjectDTO;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Stateless
@@ -28,7 +27,6 @@ public class ProjectService {
         return entityManager.find(Project.class, id);
     }
 
-    @Transactional
     public Project saveProject(Project project) {
         if (project.getId() != null) {
             entityManager.merge(project);
@@ -48,7 +46,6 @@ public class ProjectService {
         return saveProject(project);
     }
 
-    @Transactional
     public void removeProject(Long projectId) {
         entityManager.remove(findProject(projectId));
     }

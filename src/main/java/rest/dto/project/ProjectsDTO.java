@@ -2,6 +2,7 @@ package rest.dto.project;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.ws.rs.core.Link;
 import javax.xml.bind.annotation.XmlElement;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @XmlRootElement
 public class ProjectsDTO {
 

@@ -1,6 +1,7 @@
 package rest.dto.project;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import repository.entities.Project;
 import rest.validation.annotations.UserExists;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 
 @Data
+@NoArgsConstructor
 @XmlRootElement
 public class ProjectDTO {
 
@@ -23,7 +25,7 @@ public class ProjectDTO {
 
     @XmlElement
     @NotNull(message = "project name must be set")
-    @Size(min = 2, max = 10, message = "Project name must be longer than 1 character and shorter than 11 characters")
+    @Size(min = 2, max = 25, message = "Project name must be longer than 1 character and shorter than 25 characters")
     private String name;
 
     @XmlElement

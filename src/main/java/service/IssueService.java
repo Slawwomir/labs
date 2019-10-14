@@ -10,7 +10,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 import java.util.List;
 
 
@@ -23,7 +22,6 @@ public class IssueService {
     @Inject
     private UserService userService;
 
-    @Transactional
     public List<Issue> findAllIssues() {
         return entityManager.createNamedQuery("Issue.findAll", Issue.class).getResultList();
     }
@@ -35,17 +33,14 @@ public class IssueService {
         return entityManager.find(Issue.class, id);
     }
 
-    @Transactional
     public List<Issue> findIssuesByProjectId(Long projectId) {
         return entityManager.createNamedQuery("Issue.findByProjectId", Issue.class).setParameter(1, projectId).getResultList();
     }
 
-    @Transactional
     public List<Issue> findIssuesByReporterId(Long reporterId) {
         return entityManager.createNamedQuery("Issue.findByReporterId", Issue.class).setParameter(1, reporterId).getResultList();
     }
 
-    @Transactional
     public synchronized Issue saveIssue(Issue issue) {
         if (issue.getId() != null) {
             entityManager.merge(issue);
@@ -56,7 +51,6 @@ public class IssueService {
         return issue;
     }
 
-    @Transactional
     public void removeIssue(Long issueId) {
         entityManager.remove(findIssue(issueId));
     }
