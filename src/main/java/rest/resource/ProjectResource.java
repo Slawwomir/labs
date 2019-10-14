@@ -12,6 +12,7 @@ import service.ProjectService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -65,7 +66,7 @@ public class ProjectResource {
     }
 
     @POST
-    public Response addProject(ProjectDTO project) {
+    public Response addProject(@Valid ProjectDTO project) {
         if (project.getId() != null && projectService.findProject(project.getId()) != null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -75,7 +76,7 @@ public class ProjectResource {
     }
 
     @PUT
-    public Response updateProject(ProjectDTO project) {
+    public Response updateProject(@Valid ProjectDTO project) {
         if (projectService.findProject(project.getId()) == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -87,6 +88,9 @@ public class ProjectResource {
     @DELETE
     @Path("{projectId}")
     public Response removeProject(@PathParam("projectId") Long projectId) {
+        if(projectId == null || projectService.findProject(projectId) == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
         projectService.removeProject(projectId);
 
         return Response.ok().build();

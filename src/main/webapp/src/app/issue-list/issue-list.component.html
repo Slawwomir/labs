@@ -10,11 +10,12 @@
   <li *ngFor="let issue of issues">
     <a routerLink="/issue/{{issue.id}}">
       <span class="badge">{{issue.id}}</span> {{issue.name}}
-    </a><button (click)="remove(issue)">Remove</button>
+    </a>
+    <button (click)="remove(issue)">Remove</button>
   </li>
 </ul>
 <div>
-<label><input #issueName placeholder="What has to be done?"/></label>
+  <label><input #issueName placeholder="What has to be done?"/></label>
   <button (click)="add(issueName.value); issueName.value=''">
     Create
   </button>
@@ -22,6 +23,7 @@
     Full create
   </button>
 </div>
+<span class="error-text" *ngIf="errorMessages['name']">{{errorMessages['name']}}</span>
 
 <app-issue-edit *ngIf="isFullCreate" [issue]="newIssue" (onSave)="save($event)"></app-issue-edit>
 

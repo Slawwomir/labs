@@ -18,6 +18,7 @@ export class IssueListComponent implements OnInit {
   issues: Issue[];
   statuses: string[];
   filterByStatus: String;
+  errorMessages: String[];
 
   isFullCreate: boolean;
   newIssue: Issue;
@@ -31,6 +32,7 @@ export class IssueListComponent implements OnInit {
 
   ngOnInit() {
     this.filterByStatus = "";
+    this.errorMessages = [];
     this.getIssues();
     this.getStatuses();
   }
@@ -54,17 +56,27 @@ export class IssueListComponent implements OnInit {
       status: "OPEN",
       type: "TASK"
     } as Issue)
-      .subscribe(issue => this.issues.push(issue));
+      .subscribe(issue => {
+          this.issues.push(issue);
+          this.errorMessages = [];
+        },
+        error => {
+          error.error.parameterViolations.forEach(err => {
+            this.errorMessages[err.path.split(".")[2]] = err.message;
+          });
+        });
   }
 
   fullCreate(issueName: string): void {
     this.isFullCreate = true;
+    this.errorMessages = [];
     this.newIssue = {name: issueName, projectId: this.projectId} as Issue;
   }
 
   save(issue: Issue): void {
     this.isFullCreate = false;
-    this.issues.push(issue);
+    this.getIssues();
+    this.errorMessages = [];
   }
 
   remove(issue: Issue): void {

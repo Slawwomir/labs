@@ -27,3 +27,7 @@ nav a:hover {
 nav a.active {
   color: #039be5;
 }
+.error-text {
+  color: #D8000C;
+  background-color: #FFD2D2;
+}

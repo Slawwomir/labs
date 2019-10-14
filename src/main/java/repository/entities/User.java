@@ -11,7 +11,10 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@NamedQuery(name = "User.findAll", query = "SELECT u FROM User u")
+@NamedQueries({
+        @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
+        @NamedQuery(name = "User.remove", query = "DELETE FROM User u where u.id = ?1")
+})
 public class User implements Serializable {
 
     @Id

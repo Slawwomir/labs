@@ -153,7 +153,7 @@ public class IssueResource {
         return links;
     }
 
-    public static void setLinksForIssue(@Context UriInfo uriInfo, IssueDTO issue) {
+    static void setLinksForIssue(@Context UriInfo uriInfo, IssueDTO issue) {
         Long issueId = issue.getId();
         List<Link> links = new ArrayList<>();
         links.add(getSelfLinkForIssue(uriInfo, issueId));

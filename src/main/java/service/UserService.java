@@ -36,15 +36,13 @@ public class UserService {
         return user;
     }
 
-    @Transactional
     public void removeUser(User user) {
-        entityManager.remove(user);
+        removeUser(user.getId());
     }
 
+    @Transactional
     public void removeUser(Long userId) {
-        User user = new User();
-        user.setId(userId);
-        removeUser(user);
+        entityManager.createNamedQuery("User.remove", User.class).setParameter(1, userId);
     }
 
     public User saveUser(UserDTO userDTO) {

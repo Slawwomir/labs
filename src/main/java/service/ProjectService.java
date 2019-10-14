@@ -17,18 +17,16 @@ public class ProjectService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Transactional
     public List<Project> findAllProjects() {
         return entityManager.createNamedQuery("Project.findAll", Project.class).getResultList();
     }
 
-    @Transactional
     public Project findProject(Long id) {
         return entityManager.find(Project.class, id);
     }
 
     @Transactional
-    public synchronized Project saveProject(Project project) {
+    public Project saveProject(Project project) {
         if (project.getId() != null) {
             entityManager.merge(project);
         } else {
@@ -42,21 +40,17 @@ public class ProjectService {
         Project project = new Project();
         project.setId(projectDTO.getId());
         project.setName(projectDTO.getName());
-
-        if(projectDTO.getProjectOwnerId() != null) {
-            project.setProjectOwner(entityManager.find(User.class, projectDTO.getProjectOwnerId()));
-        }
+        project.setProjectOwner(entityManager.find(User.class, projectDTO.getProjectOwnerId()));
 
         return saveProject(project);
     }
 
-    @Transactional
     public void removeProject(Project project) {
-        Project toRemove = entityManager.contains(project) ? project : entityManager.merge(project);
-        entityManager.remove(toRemove);
+        removeProject(project.getId());
     }
 
+    @Transactional
     public void removeProject(Long projectId) {
-        removeProject(findProject(projectId));
+        entityManager.createNamedQuery("Project.remove", Project.class).setParameter(1, projectId);
     }
 }

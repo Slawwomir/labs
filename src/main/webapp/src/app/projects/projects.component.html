@@ -1,9 +1,10 @@
 <h2>My projects</h2>
 <ul class="projects">
   <li *ngFor="let project of projects">
-      <a routerLink="/detail/{{project.id}}">
-        <span class="badge">{{project.id}}</span> {{project.name}}
-      </a><button (click)="remove(project)">Remove</button>
+    <a routerLink="/detail/{{project.id}}">
+      <span class="badge">{{project.id}}</span> {{project.name}}
+    </a>
+    <button (click)="remove(project)">Remove</button>
   </li>
 </ul>
 
@@ -16,3 +17,5 @@
     create
   </button>
 </div>
+<span class="error-text" *ngIf="errors['name']">{{errors['name']}}</span>
+

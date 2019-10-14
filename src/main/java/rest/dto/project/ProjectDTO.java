@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import repository.entities.Project;
+import rest.validation.annotations.UserExists;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -32,6 +33,7 @@ public class ProjectDTO {
     private String name;
 
     @XmlElement
+    @UserExists
     private Long projectOwnerId;
 
     @XmlElement

@@ -54,16 +54,13 @@ public class IssueService {
         return issue;
     }
 
-    @Transactional
     public void removeIssue(Issue issue) {
-        Issue toRemove = entityManager.contains(issue) ? issue : entityManager.merge(issue);
-        entityManager.remove(toRemove);
+        removeIssue(issue.getId());
     }
 
+    @Transactional
     public void removeIssue(Long issueId) {
-        Issue issue = new Issue();
-        issue.setId(issueId);
-        removeIssue(issue);
+        entityManager.createNamedQuery("Issue.remove", Issue.class).setParameter(1, issueId);
     }
 
     public List<IssueStatus> getIssueStatuses() {

@@ -7,6 +7,7 @@ import service.UserService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -62,7 +63,7 @@ public class UserResource {
     }
 
     @POST
-    public Response addUser(UserDTO user) {
+    public Response addUser(@Valid UserDTO user) {
         if (user.getId() != null && userService.findUser(user.getId()) != null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -72,7 +73,7 @@ public class UserResource {
     }
 
     @PUT
-    public Response updateUser(UserDTO user) {
+    public Response updateUser(@Valid UserDTO user) {
         if (user == null || user.getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }

@@ -26,7 +26,7 @@ export class ProjectService {
 
   getProjects(): Observable<Project[]> {
     this.messageService.add('ProjectService: fetched projects');
-    return this.httpClient.get<Project[]>(this.getProjectsUrl(), { params: new HttpParams().set("size", "-1") })
+    return this.httpClient.get<Project[]>(this.getProjectsUrl(), {params: new HttpParams().set("size", "-1")})
       .pipe(
         map(response => response["projects"]),
         tap(_ => this.log('get projects')),
@@ -44,18 +44,16 @@ export class ProjectService {
   }
 
   updateProject(project: Project): Observable<Project> {
-    return this.httpClient.put(this.getProjectsUrl(), project, this.httpOptions)
+    return this.httpClient.put<Project>(this.getProjectsUrl(), project, this.httpOptions)
       .pipe(
-        tap(_ => this.log(`update project id=${project.id}`)),
-        catchError(this.handleError<any>('updateProject'))
+        tap(_ => this.log(`update project id=${project.id}`))
       )
   }
 
   createProject(project: Project): Observable<Project> {
-    return this.httpClient.post(this.getProjectsUrl(), project, this.httpOptions)
+    return this.httpClient.post<Project>(this.getProjectsUrl(), project, this.httpOptions)
       .pipe(
-        tap(_ => this.log(`create project name=${project.name}`)),
-        catchError(this.handleError<any>('createProject'))
+        tap(_ => this.log(`create project name=${project.name}`))
       )
   }
 
@@ -63,7 +61,6 @@ export class ProjectService {
     return this.httpClient.delete(this.getProjectsUrl() + `/${id}`)
       .pipe(
         tap(_ => this.log(`remove project id=${id}`)),
-        catchError(this.handleError<any>('removeProject'))
       )
   }
 
@@ -72,7 +69,6 @@ export class ProjectService {
       .pipe(
         map(response => response["issues"]),
         tap(_ => this.log(`get project issues id=${project.id}`)),
-        catchError(this.handleError<any>('getIssues'))
       )
   }
 

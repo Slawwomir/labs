@@ -14,6 +14,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 export class ProjectDetailComponent implements OnInit {
 
   project: Project;
+  projectEdit: Project;
   editMode: boolean;
   errors: string[];
 
@@ -40,16 +41,19 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   save(): void {
-    this.projectService.updateProject(this.project)
-      .subscribe(_ => {
+    this.projectService.updateProject(this.projectEdit)
+      .subscribe(project => {
+        this.project = project;
+        this.editMode = false;
       }, error => {
         this.mapErrors(error);
       });
-    this.editMode = false;
   }
 
   edit(): void {
     this.editMode = true;
+    this.errors = [];
+    this.projectEdit = Object.assign({}, this.project);
   }
 
 

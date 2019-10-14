@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import repository.entities.Issue;
+import rest.validation.annotations.ProjectExists;
+import rest.validation.annotations.UserExists;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -41,15 +43,21 @@ public class IssueDTO {
     private String name;
 
     @XmlElement
+    @Size(max = 10000, message = "Description cannot be longer than 10000 characters.")
     private String description;
 
     @XmlElement
+    @ProjectExists
+    @NotNull
     private Long projectId;
 
     @XmlElement
+    @UserExists
+    @NotNull
     private Long reporterId;
 
     @XmlElement
+    @UserExists
     private Long assigneeId;
 
     @XmlElement

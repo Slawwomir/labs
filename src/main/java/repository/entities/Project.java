@@ -1,5 +1,6 @@
 package repository.entities;
 
+import jdk.jfr.Name;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,8 @@ import java.util.List;
 
 @Entity
 @NamedQueries({
-        @NamedQuery(name = "Project.findAll", query = "SELECT p FROM Project p")
+        @NamedQuery(name = "Project.findAll", query = "SELECT p FROM Project p"),
+        @NamedQuery(name = "Project.remove", query = "DELETE Issue i where i.id = ?1")
 })
 @Getter
 @Setter
@@ -28,7 +30,7 @@ public class Project implements Serializable {
     private String name;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_owner_id")
     private User projectOwner;
 

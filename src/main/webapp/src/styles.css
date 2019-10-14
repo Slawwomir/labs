@@ -40,3 +40,9 @@ button {
 button:hover {
   background-color: #cfd8dc;
 }
+
+.error-text {
+  color: #D8000C;
+  background-color: #FFD2D2;
+}
+
