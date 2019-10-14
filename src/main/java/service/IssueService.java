@@ -28,8 +28,10 @@ public class IssueService {
         return entityManager.createNamedQuery("Issue.findAll", Issue.class).getResultList();
     }
 
-    @Transactional
     public Issue findIssue(Long id) {
+        if (id == null) {
+            return null;
+        }
         return entityManager.find(Issue.class, id);
     }
 
@@ -60,7 +62,7 @@ public class IssueService {
 
     @Transactional
     public void removeIssue(Long issueId) {
-        entityManager.createNamedQuery("Issue.remove", Issue.class).setParameter(1, issueId);
+        entityManager.remove(findIssue(issueId));
     }
 
     public List<IssueStatus> getIssueStatuses() {
@@ -74,19 +76,9 @@ public class IssueService {
     public Issue saveIssue(IssueDTO issueDTO) {
         Issue issue = new Issue();
         issue.setId(issueDTO.getId());
-
-        if (issueDTO.getProjectId() != null) {
-            issue.setProject(entityManager.find(Project.class, issueDTO.getProjectId()));
-        }
-
-        if (issueDTO.getAssigneeId() != null) {
-            issue.setAssignee(userService.findUser(issueDTO.getAssigneeId()));
-        }
-
-        if (issueDTO.getReporterId() != null) {
-            issue.setReporter(userService.findUser(issueDTO.getReporterId()));
-        }
-
+        issue.setProject(entityManager.find(Project.class, issueDTO.getProjectId()));
+        issue.setReporter(userService.findUser(issueDTO.getReporterId()));
+        issue.setAssignee(userService.findUser(issueDTO.getAssigneeId()));
         issue.setDescription(issueDTO.getDescription());
         issue.setName(issueDTO.getName());
         issue.setStatus(issueDTO.getStatus());

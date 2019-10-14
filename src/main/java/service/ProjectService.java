@@ -22,6 +22,10 @@ public class ProjectService {
     }
 
     public Project findProject(Long id) {
+        if (id == null) {
+            return null;
+        }
+
         return entityManager.find(Project.class, id);
     }
 
@@ -45,12 +49,8 @@ public class ProjectService {
         return saveProject(project);
     }
 
-    public void removeProject(Project project) {
-        removeProject(project.getId());
-    }
-
     @Transactional
     public void removeProject(Long projectId) {
-        entityManager.createNamedQuery("Project.remove", Project.class).setParameter(1, projectId);
+        entityManager.remove(findProject(projectId));
     }
 }

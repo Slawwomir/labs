@@ -14,7 +14,7 @@ import java.util.List;
 @Entity
 @NamedQueries({
         @NamedQuery(name = "Project.findAll", query = "SELECT p FROM Project p"),
-        @NamedQuery(name = "Project.remove", query = "DELETE Issue i where i.id = ?1")
+        @NamedQuery(name = "Project.remove", query = "DELETE FROM Project p where p.id = ?1")
 })
 @Getter
 @Setter
@@ -34,7 +34,7 @@ public class Project implements Serializable {
     @JoinColumn(name = "project_owner_id")
     private User projectOwner;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, mappedBy = "project")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "project")
     private List<Issue> issues;
 
 }

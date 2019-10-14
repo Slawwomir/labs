@@ -22,6 +22,9 @@ public class UserService {
 
     @Transactional
     public User findUser(Long id) {
+        if (id == null) {
+            return null;
+        }
         return entityManager.find(User.class, id);
     }
 
@@ -36,13 +39,9 @@ public class UserService {
         return user;
     }
 
-    public void removeUser(User user) {
-        removeUser(user.getId());
-    }
-
     @Transactional
     public void removeUser(Long userId) {
-        entityManager.createNamedQuery("User.remove", User.class).setParameter(1, userId);
+        entityManager.remove(findUser(userId));
     }
 
     public User saveUser(UserDTO userDTO) {
