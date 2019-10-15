@@ -5,8 +5,9 @@ import rest.dto.issue.IssueDTO;
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
 import rest.dto.issue.IssuesDTO;
+import rest.resource.utils.LinksUtils;
+import rest.validation.annotations.IssueExists;
 import service.IssueService;
-import service.ProjectService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -25,10 +26,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,14 +40,18 @@ public class IssueResource {
     private IssueService issueService;
 
     @Inject
-    private ProjectService projectService;
+    private LinksUtils linksUtils;
 
     @GET
-    public Response getIssues(@Context UriInfo uriInfo, @QueryParam("start") int start, @QueryParam("size") @DefaultValue("2") int size) {
-        List<IssueDTO> issuesDTO = issueService.findAllIssues().stream().map(IssueDTO::new).collect(Collectors.toList());
-        List<Link> links = getLinksForIssues(issuesDTO, uriInfo, start, size);
-        List<IssueDTO> issues = issuesDTO.subList(start, Math.min(start + size, issuesDTO.size()));
-        issues.forEach(issue -> setLinksForIssue(uriInfo, issue));
+    public Response getIssues(@Context UriInfo uriInfo,
+                              @QueryParam("start") int start,
+                              @QueryParam("size") @DefaultValue("2") int size) {
+        List<IssueDTO> issues = issueService.findIssues(start, size).stream()
+                .map(IssueDTO::new)
+                .collect(Collectors.toList());
+
+        List<Link> links = linksUtils.getLinksForPagination(uriInfo, start, size, issueService.getIssuesCount());
+        issues.forEach(issue -> linksUtils.setLinksForIssue(uriInfo, issue));
         IssuesDTO issuesEntity = new IssuesDTO(issues, links);
 
         return Response.ok(issuesEntity).build();
@@ -57,24 +59,16 @@ public class IssueResource {
 
     @POST
     public Response addIssue(@Valid IssueDTO issue) {
-        if (issue.getProjectId() == null || projectService.findProject(issue.getProjectId()) == null) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
         Issue newIssue = issueService.saveIssue(issue);
+
         return Response.ok(new IssueDTO(newIssue)).build();
     }
 
     @PUT
     public Response updateIssue(@Valid IssueDTO issue) {
-        if (issue == null || issue.getProjectId() == null || issue.getId() == null) {
+        if (issue.getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
-
-        if (issueService.findIssue(issue.getId()) == null) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
         Issue updatedIssue = issueService.saveIssue(issue);
 
         return Response.ok(new IssueDTO(updatedIssue)).build();
@@ -82,26 +76,19 @@ public class IssueResource {
 
     @DELETE
     @Path("{issueId}")
-    public Response removeIssue(@PathParam("issueId") Long issueId) {
-        if (issueService.findIssue(issueId) == null) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
+    public Response removeIssue(@PathParam("issueId") @IssueExists Long issueId) {
         issueService.removeIssue(issueId);
+
         return Response.ok().build();
     }
 
     @GET
     @Path("{issueId}")
-    public Response getIssue(@Context UriInfo uriInfo, @PathParam("issueId") Long issueId) {
+    public Response getIssue(@Context UriInfo uriInfo,
+                             @PathParam("issueId") @IssueExists Long issueId) {
         Issue issue = issueService.findIssue(issueId);
-
-        if (issue == null) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
         IssueDTO issueDTO = new IssueDTO(issue);
-        setLinksForIssue(uriInfo, issueDTO);
+        linksUtils.setLinksForIssue(uriInfo, issueDTO);
 
         return Response.ok(issueDTO).build();
     }
@@ -120,73 +107,5 @@ public class IssueResource {
         List<IssueType> issueTypes = issueService.getIssueTypes();
 
         return Response.ok(issueTypes).build();
-    }
-
-    private List<Link> getLinksForIssues(List<IssueDTO> issuesDTO, UriInfo uriInfo, int start, int size) {
-        UriBuilder pathBuilder = uriInfo.getAbsolutePathBuilder();
-        pathBuilder.queryParam("start", "{start}");
-        pathBuilder.queryParam("size", "{size}");
-
-        List<Link> links = new ArrayList<>();
-        links.add(Link.fromUri(uriInfo.getRequestUri()).rel("self").build());
-
-        if (start + size < issuesDTO.size()) {
-            int next = start + size;
-            URI nextUri = pathBuilder.clone().build(next, size);
-            Link nextLink = Link.fromUri(nextUri)
-                    .rel("next")
-                    .type("application/json")
-                    .build();
-            links.add(nextLink);
-        }
-
-        if (start > 0) {
-            int previous = Math.max(start - size, 0);
-            URI previousUri = pathBuilder.clone().build(previous, size);
-            Link previousLink = Link.fromUri(previousUri)
-                    .rel("previous")
-                    .type("application/json")
-                    .build();
-            links.add(previousLink);
-        }
-
-        return links;
-    }
-
-    static void setLinksForIssue(@Context UriInfo uriInfo, IssueDTO issue) {
-        Long issueId = issue.getId();
-        List<Link> links = new ArrayList<>();
-        links.add(getSelfLinkForIssue(uriInfo, issueId));
-        links.add(getDeleteLinkForIssue(uriInfo, issueId));
-        links.add(getProjectLink(uriInfo, issue.getProjectId()));
-
-        if (issue.getReporterId() != null) {
-            links.add(getReporterLink(uriInfo, issue.getReporterId()));
-        }
-        if (issue.getAssigneeId() != null) {
-            links.add(getAssigneeLink(uriInfo, issue.getAssigneeId()));
-        }
-
-        issue.setLinks(links);
-    }
-
-    private static Link getSelfLinkForIssue(UriInfo uriInfo, Long issueId) {
-        return Link.fromUri(uriInfo.getBaseUriBuilder().path("issue").path(String.valueOf(issueId)).build()).rel("self").build();
-    }
-
-    private static Link getDeleteLinkForIssue(UriInfo uriInfo, Long issueId) {
-        return Link.fromUri(uriInfo.getBaseUriBuilder().path("issue").path(String.valueOf(issueId)).build()).param("method", "DELETE").rel("delete").build();
-    }
-
-    private static Link getReporterLink(UriInfo uriInfo, Long userId) {
-        return Link.fromUri(uriInfo.getBaseUriBuilder().path(UserResource.class).path(UserResource.class, "getUser").build(userId)).rel("reporter").build();
-    }
-
-    private static Link getAssigneeLink(UriInfo uriInfo, Long userId) {
-        return Link.fromUri(uriInfo.getBaseUriBuilder().path(UserResource.class).path(UserResource.class, "getUser").build(userId)).rel("assignee").build();
-    }
-
-    private static Link getProjectLink(UriInfo uriInfo, Long projecId) {
-        return Link.fromUri(uriInfo.getBaseUriBuilder().path(ProjectResource.class).path(ProjectResource.class, "getProject").build(projecId)).rel("project").build();
     }
 }

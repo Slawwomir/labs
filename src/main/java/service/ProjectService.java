@@ -20,6 +20,17 @@ public class ProjectService {
         return entityManager.createNamedQuery("Project.findAll", Project.class).getResultList();
     }
 
+    public List<Project> findProjects(int start, int size) {
+        return entityManager.createNamedQuery("Project.findAll", Project.class)
+                .setFirstResult(start)
+                .setMaxResults(size)
+                .getResultList();
+    }
+
+    public Long getProjectsCount() {
+        return entityManager.createQuery("SELECT COUNT(p) FROM Project p", Long.class).getSingleResult();
+    }
+
     public Project findProject(Long id) {
         if (id == null) {
             return null;
@@ -52,6 +63,9 @@ public class ProjectService {
     }
 
     public Issue findIssueFromProject(Long projectId, Long issueId) {
-        return entityManager.createNamedQuery("Issue.findByIssueIdAndProjectId", Issue.class).setParameter(1, issueId).setParameter(2, projectId).getSingleResult();
+        return entityManager.createNamedQuery("Issue.findByIssueIdAndProjectId", Issue.class)
+                .setParameter(1, issueId)
+                .setParameter(2, projectId)
+                .getSingleResult();
     }
 }

@@ -12,7 +12,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 
-
 @Stateless
 public class IssueService {
 
@@ -26,6 +25,17 @@ public class IssueService {
         return entityManager.createNamedQuery("Issue.findAll", Issue.class).getResultList();
     }
 
+    public List<Issue> findIssues(int start, int max) {
+        return entityManager.createNamedQuery("Issue.findAll", Issue.class)
+                .setFirstResult(start)
+                .setMaxResults(max)
+                .getResultList();
+    }
+
+    public Long getIssuesCount() {
+        return entityManager.createQuery("SELECT COUNT(i) FROM Issue i", Long.class).getSingleResult();
+    }
+
     public Issue findIssue(Long id) {
         if (id == null) {
             return null;
@@ -34,11 +44,15 @@ public class IssueService {
     }
 
     public List<Issue> findIssuesByProjectId(Long projectId) {
-        return entityManager.createNamedQuery("Issue.findByProjectId", Issue.class).setParameter(1, projectId).getResultList();
+        return entityManager.createNamedQuery("Issue.findByProjectId", Issue.class)
+                .setParameter(1, projectId)
+                .getResultList();
     }
 
     public List<Issue> findIssuesByReporterId(Long reporterId) {
-        return entityManager.createNamedQuery("Issue.findByReporterId", Issue.class).setParameter(1, reporterId).getResultList();
+        return entityManager.createNamedQuery("Issue.findByReporterId", Issue.class)
+                .setParameter(1, reporterId)
+                .getResultList();
     }
 
     public synchronized Issue saveIssue(Issue issue) {

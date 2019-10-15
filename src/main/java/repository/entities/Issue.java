@@ -2,8 +2,7 @@ package repository.entities;
 
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -20,8 +19,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
-@Getter
-@Setter
+@Data
 @NamedQueries({
         @NamedQuery(name = "Issue.findAll", query = "SELECT i FROM Issue i"),
         @NamedQuery(name = "Issue.findByProjectId", query = "SELECT i FROM Issue i WHERE i.project.id = ?1"),
