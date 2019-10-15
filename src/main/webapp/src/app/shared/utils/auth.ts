@@ -1,4 +1,4 @@
-import {User} from "../user.service";
+import {User} from "../../projects/project-detail/issue-list/shared/user.service";
 
 export class Auth {
   static getCurrentUser(): User {

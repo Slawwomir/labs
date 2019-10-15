@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {ProjectService} from "../project.service";
-import {Project} from "../project";
-import {AppComponent} from "../app.component";
-import {Auth} from "../utils/auth";
+import {Project} from "../shared/project";
+import {Auth} from "../shared/utils/auth";
+import {ValidationUtils} from "../shared/utils/validationUtils";
 
 @Component({
   selector: 'app-projects',
@@ -29,9 +29,7 @@ export class ProjectsComponent implements OnInit {
         this.projects = projects;
         this.errors = [];
       }, error => {
-        error.error.parameterViolations.forEach(err => {
-          this.errors[err.path.split(".")[2]] = err.message;
-        });
+        this.errors = ValidationUtils.mapErrors(error);
       });
   }
 
@@ -44,9 +42,7 @@ export class ProjectsComponent implements OnInit {
         this.getProjects();
         this.errors = [];
       }, error => {
-        error.error.parameterViolations.forEach(err => {
-          this.errors[err.path.split(".")[2]] = err.message;
-        })
+        this.errors = ValidationUtils.mapErrors(error);
       });
   }
 

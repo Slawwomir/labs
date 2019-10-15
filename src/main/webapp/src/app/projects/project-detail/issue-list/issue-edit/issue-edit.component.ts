@@ -1,11 +1,11 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {IssueService} from "../issue.service";
-import {Issue} from "../issue";
-import {Project} from "../project";
-import {ProjectService} from "../project.service";
-import {HttpErrorResponse} from "@angular/common/http";
-import {User, UserService} from "../user.service";
-import {Auth} from "../utils/auth";
+import {IssueService} from "../shared/issue.service";
+import {Issue} from "../../../../shared/issue";
+import {Project} from "../../../../shared/project";
+import {ProjectService} from "../../../../project.service";
+import {User, UserService} from "../shared/user.service";
+import {Auth} from "../../../../shared/utils/auth";
+import {ValidationUtils} from "../../../../shared/utils/validationUtils";
 
 @Component({
   selector: 'app-issue-edit',
@@ -24,7 +24,7 @@ export class IssueEditComponent implements OnInit {
   types: string[];
   users: User[];
   projects: Project[];
-  errors: string[];
+  errors: String[];
 
   constructor(
     private issueService: IssueService,
@@ -55,35 +55,31 @@ export class IssueEditComponent implements OnInit {
 
   onSubmit(): void {
     if (this.issue.id) {
-      this.issueService.updateIssue(this.issue)
-        .subscribe(issue => {
-          this.issue = issue;
-          this.onSave.emit(issue);
-        }, error => {
-          this.mapErrors(error);
-        });
+      this.updateIssue();
     } else {
-      this.issue.reporterId = Auth.getCurrentUser().id;
-      this.issueService.createIssue(this.issue)
-        .subscribe(issue => {
-          this.issue = issue;
-          this.onSave.emit(issue);
-        }, error => {
-          this.mapErrors(error);
-        });
-
+      this.saveIssue();
     }
   }
 
-  private mapErrors(error) {
-    if (error instanceof HttpErrorResponse) {
-      const errorMessages = [];
-      error.error.parameterViolations.forEach(err => {
-        errorMessages[err.path.split(".")[2]] = err.message;
+  private saveIssue() {
+    this.issue.reporterId = Auth.getCurrentUser().id;
+    this.issueService.createIssue(this.issue)
+      .subscribe(issue => {
+        this.issue = issue;
+        this.onSave.emit(issue);
+      }, error => {
+        this.errors = ValidationUtils.mapErrors(error);
       });
+  }
 
-      this.errors = errorMessages;
-    }
+  private updateIssue() {
+    this.issueService.updateIssue(this.issue)
+      .subscribe(issue => {
+        this.issue = issue;
+        this.onSave.emit(issue);
+      }, error => {
+        this.errors = ValidationUtils.mapErrors(error);
+      });
   }
 
   private getStatuses(): void {

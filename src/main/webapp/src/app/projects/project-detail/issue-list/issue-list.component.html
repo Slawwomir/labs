@@ -1,7 +1,7 @@
 <div>
   <label> Filter by status:
     <select [(ngModel)]="filterByStatus" (ngModelChange)="getIssues()">
-      <option [value]="null">All</option>
+      <option>All</option>
       <option *ngFor="let status of statuses" [value]="status">{{status}}</option>
     </select>
   </label>

@@ -1,8 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {MessageService} from "./message.service";
 import {Observable} from "rxjs";
-import {Issue} from "./issue";
+import {Issue} from "../../../../shared/issue";
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +17,6 @@ export class IssueService {
 
   constructor(
     private httpClient: HttpClient,
-    private messageService: MessageService
   ) {
   }
 

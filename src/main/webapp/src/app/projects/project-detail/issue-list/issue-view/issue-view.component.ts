@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {Issue} from "../issue";
-import {IssueService} from "../issue.service";
+import {Issue} from "../../../../shared/issue";
+import {IssueService} from "../shared/issue.service";
 import {ActivatedRoute} from "@angular/router";
 import {Location} from "@angular/common";
-import {User, UserService} from "../user.service";
+import {User, UserService} from "../shared/user.service";
 
 @Component({
   selector: 'app-issue-view',

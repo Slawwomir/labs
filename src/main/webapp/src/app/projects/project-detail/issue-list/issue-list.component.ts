@@ -1,10 +1,11 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Project} from "../project";
-import {ProjectService} from "../project.service";
-import {Issue} from "../issue";
-import {IssueService} from "../issue.service";
+import {Project} from "../../../shared/project";
+import {ProjectService} from "../../../project.service";
+import {Issue} from "../../../shared/issue";
+import {IssueService} from "./shared/issue.service";
 import {Location} from "@angular/common";
-import {Auth} from "../utils/auth";
+import {Auth} from "../../../shared/utils/auth";
+import {ValidationUtils} from "../../../shared/utils/validationUtils";
 
 @Component({
   selector: 'app-issue-list',
@@ -12,6 +13,8 @@ import {Auth} from "../utils/auth";
   styleUrls: ['./issue-list.component.css']
 })
 export class IssueListComponent implements OnInit {
+
+  private static DEFAULT_SELECT = "All";
 
   @Input()
   projectId: number;
@@ -31,21 +34,10 @@ export class IssueListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.filterByStatus = "";
+    this.filterByStatus = IssueListComponent.DEFAULT_SELECT;
     this.errorMessages = [];
     this.getIssues();
     this.getStatuses();
-  }
-
-  private getIssues(): void {
-    const filters = (this.filterByStatus && this.filterByStatus != "null") ? {status: this.filterByStatus} : {};
-    this.projectService.getIssues({id: this.projectId} as Project, filters)
-      .subscribe(issues => this.issues = issues);
-  }
-
-  private getStatuses(): void {
-    this.issueService.getStatuses()
-      .subscribe(statuses => this.statuses = statuses);
   }
 
   add(issueName: string): void {
@@ -57,14 +49,11 @@ export class IssueListComponent implements OnInit {
       type: "TASK"
     } as Issue)
       .subscribe(issue => {
-          this.issues.push(issue);
-          this.errorMessages = [];
-        },
-        error => {
-          error.error.parameterViolations.forEach(err => {
-            this.errorMessages[err.path.split(".")[2]] = err.message;
-          });
-        });
+        this.getIssues();
+        this.errorMessages = [];
+      }, error => {
+        this.errorMessages = ValidationUtils.mapErrors(error);
+      });
   }
 
   fullCreate(issueName: string): void {
@@ -86,5 +75,21 @@ export class IssueListComponent implements OnInit {
 
   goBack(): void {
     this.location.back();
+  }
+
+  private getIssues(): void {
+    let filters: {};
+
+    if (this.filterByStatus != IssueListComponent.DEFAULT_SELECT) {
+      filters = {status: this.filterByStatus};
+    }
+
+    this.projectService.getIssues({id: this.projectId} as Project, filters)
+      .subscribe(issues => this.issues = issues);
+  }
+
+  private getStatuses(): void {
+    this.issueService.getStatuses()
+      .subscribe(statuses => this.statuses = statuses);
   }
 }

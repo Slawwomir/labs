@@ -2,9 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
 import {Location} from "@angular/common";
 
-import {ProjectService} from "../project.service";
-import {Project} from "../project";
-import {HttpErrorResponse} from "@angular/common/http";
+import {ProjectService} from "../../project.service";
+import {Project} from "../../shared/project";
+import {ValidationUtils} from "../../shared/utils/validationUtils";
 
 @Component({
   selector: 'app-project-detail',
@@ -16,7 +16,7 @@ export class ProjectDetailComponent implements OnInit {
   project: Project;
   projectEdit: Project;
   editMode: boolean;
-  errors: string[];
+  errors: String[];
 
   constructor(
     private route: ActivatedRoute,
@@ -46,7 +46,7 @@ export class ProjectDetailComponent implements OnInit {
         this.project = project;
         this.editMode = false;
       }, error => {
-        this.mapErrors(error);
+        this.errors = ValidationUtils.mapErrors(error);
       });
   }
 
@@ -54,17 +54,5 @@ export class ProjectDetailComponent implements OnInit {
     this.editMode = true;
     this.errors = [];
     this.projectEdit = Object.assign({}, this.project);
-  }
-
-
-  private mapErrors(error) {
-    if (error instanceof HttpErrorResponse) {
-      const errorMessages = [];
-      error.error.parameterViolations.forEach(err => {
-        errorMessages[err.path.split(".")[2]] = err.message;
-      });
-
-      this.errors = errorMessages;
-    }
   }
 }
