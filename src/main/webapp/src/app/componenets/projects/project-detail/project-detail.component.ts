@@ -2,9 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
 import {Location} from "@angular/common";
 
-import {ProjectService} from "../../project.service";
-import {Project} from "../../shared/project";
-import {ValidationUtils} from "../../shared/utils/validationUtils";
+import {ProjectService} from "../../../services/project.service";
+import {Project} from "../../../models/project";
+import {ValidationUtils} from "../../../shared/utils/validationUtils";
 
 @Component({
   selector: 'app-project-detail',

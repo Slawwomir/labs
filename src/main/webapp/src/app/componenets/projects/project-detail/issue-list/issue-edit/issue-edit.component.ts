@@ -1,11 +1,11 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {IssueService} from "../shared/issue.service";
-import {Issue} from "../../../../shared/issue";
-import {Project} from "../../../../shared/project";
-import {ProjectService} from "../../../../project.service";
-import {User, UserService} from "../shared/user.service";
-import {Auth} from "../../../../shared/utils/auth";
-import {ValidationUtils} from "../../../../shared/utils/validationUtils";
+import {IssueService} from "../../../../../services/issue.service";
+import {Issue} from "../../../../../models/issue";
+import {Project} from "../../../../../models/project";
+import {ProjectService} from "../../../../../services/project.service";
+import {User, UserService} from "../../../../../services/user.service";
+import {Auth} from "../../../../../shared/utils/auth";
+import {ValidationUtils} from "../../../../../shared/utils/validationUtils";
 import {Router} from "@angular/router";
 import {Observable} from "rxjs";
 

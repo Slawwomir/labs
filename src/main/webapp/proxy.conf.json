@@ -1,0 +1,7 @@
+{
+  "/rest": {
+    "target": "http://localhost:8080/lab2-1.0-SNAPSHOT",
+    "secure": false,
+    "ws": true
+  }
+}

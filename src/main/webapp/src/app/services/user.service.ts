@@ -18,16 +18,13 @@ export class User {
 })
 export class UserService {
 
-  private baseUrl = 'http://localhost:8080/lab2-1.0-SNAPSHOT/rest';
-  private usersPath = '/users';
-
   constructor(
     private httpClient: HttpClient
   ) {
   }
 
   getUsers(): Observable<User[]> {
-    return this.httpClient.get<User[]>(this.getUserUrl())
+    return this.httpClient.get<User[]>('/rest/users')
       .pipe(
         map(respone => respone["users"])
       )
@@ -39,10 +36,6 @@ export class UserService {
   }
 
   getUser(id: number) : Observable<User> {
-    return this.httpClient.get<User>(`${this.getUserUrl()}/${id}`)
-  }
-
-  private getUserUrl(): string {
-    return `${this.baseUrl}${this.usersPath}`
+    return this.httpClient.get<User>(`rest/users/${id}`)
   }
 }

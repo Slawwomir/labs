@@ -1,11 +1,11 @@
 import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
-import {Project} from "../../../shared/project";
-import {ProjectService} from "../../../project.service";
-import {Issue} from "../../../shared/issue";
-import {IssueService} from "./shared/issue.service";
+import {Project} from "../../../../models/project";
+import {ProjectService} from "../../../../services/project.service";
+import {Issue} from "../../../../models/issue";
+import {IssueService} from "../../../../services/issue.service";
 import {Location} from "@angular/common";
-import {Auth} from "../../../shared/utils/auth";
-import {ValidationUtils} from "../../../shared/utils/validationUtils";
+import {Auth} from "../../../../shared/utils/auth";
+import {ValidationUtils} from "../../../../shared/utils/validationUtils";
 
 @Component({
   selector: 'app-issue-list',

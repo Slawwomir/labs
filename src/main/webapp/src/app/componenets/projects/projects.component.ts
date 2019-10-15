@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
-import {ProjectService} from "../project.service";
-import {Project} from "../shared/project";
-import {Auth} from "../shared/utils/auth";
-import {ValidationUtils} from "../shared/utils/validationUtils";
+import {ProjectService} from "../../services/project.service";
+import {Project} from "../../models/project";
+import {Auth} from "../../shared/utils/auth";
+import {ValidationUtils} from "../../shared/utils/validationUtils";
 
 @Component({
   selector: 'app-projects',
