@@ -19,7 +19,7 @@ export class User {
 export class UserService {
 
   private baseUrl = 'http://localhost:8080/lab2-1.0-SNAPSHOT/rest';
-  private usersPath = '/user';
+  private usersPath = '/users';
 
   constructor(
     private httpClient: HttpClient

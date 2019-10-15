@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Path("user")
+@Path("users")
 public class UserResource {
 
     @Inject

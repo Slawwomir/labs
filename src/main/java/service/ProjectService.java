@@ -1,5 +1,6 @@
 package service;
 
+import repository.entities.Issue;
 import repository.entities.Project;
 import repository.entities.User;
 import rest.dto.project.ProjectDTO;
@@ -48,5 +49,9 @@ public class ProjectService {
 
     public void removeProject(Long projectId) {
         entityManager.remove(findProject(projectId));
+    }
+
+    public Issue findIssueFromProject(Long projectId, Long issueId) {
+        return entityManager.createNamedQuery("Issue.findByIssueIdAndProjectId", Issue.class).setParameter(1, issueId).setParameter(2, projectId).getSingleResult();
     }
 }

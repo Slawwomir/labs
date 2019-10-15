@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Path("project")
+@Path("projects")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @RequestScoped
@@ -130,6 +130,27 @@ public class ProjectResource {
 
         List<Link> link = List.of(Link.fromUri(uriInfo.getRequestUri()).rel("self").build());
         return Response.ok(new IssuesDTO(issues, link)).build();
+    }
+
+    @GET
+    @Path("{projectId}/issues/{issueId}")
+    public Response getProjectIssue(@Context UriInfo uriInfo, @PathParam("projectId") Long projectId, @PathParam("issueId") Long issueId) {
+        Project project = projectService.findProject(projectId);
+
+        if (project == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        Issue issue = projectService.findIssueFromProject(projectId, issueId);
+
+        if (issue == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        IssueDTO issueDTO = new IssueDTO(issue);
+        IssueResource.setLinksForIssue(uriInfo, issueDTO);
+
+        return Response.ok(issueDTO).build();
     }
 
     private List<Link> getLinksForProjects(List<ProjectDTO> projects, UriInfo uriInfo, int start, int size) {

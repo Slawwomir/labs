@@ -12,7 +12,7 @@ import {Issue} from "./issue";
 export class ProjectService {
 
   private baseUrl = 'http://localhost:8080/lab2-1.0-SNAPSHOT/rest';
-  private projectsPath = '/project';
+  private projectsPath = '/projects';
 
   httpOptions = {
     headers: new HttpHeaders({'Content-Type': 'application/json'})

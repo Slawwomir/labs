@@ -10,7 +10,7 @@ import {Issue} from "./issue";
 export class IssueService {
 
   private baseUrl = 'http://localhost:8080/lab2-1.0-SNAPSHOT/rest';
-  private issuesPath = '/issue';
+  private issuesPath = '/issues';
 
   httpOptions = {
     headers: new HttpHeaders({'Content-Type': 'application/json'})
