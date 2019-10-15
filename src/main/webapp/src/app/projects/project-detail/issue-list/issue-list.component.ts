@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {Project} from "../../../shared/project";
 import {ProjectService} from "../../../project.service";
 import {Issue} from "../../../shared/issue";
@@ -12,7 +12,7 @@ import {ValidationUtils} from "../../../shared/utils/validationUtils";
   templateUrl: './issue-list.component.html',
   styleUrls: ['./issue-list.component.css']
 })
-export class IssueListComponent implements OnInit {
+export class IssueListComponent implements OnInit, OnChanges {
 
   private static DEFAULT_SELECT = "All";
 
@@ -91,5 +91,10 @@ export class IssueListComponent implements OnInit {
   private getStatuses(): void {
     this.issueService.getStatuses()
       .subscribe(statuses => this.statuses = statuses);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.projectId = changes.projectId.currentValue;
+    this.getIssues();
   }
 }

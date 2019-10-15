@@ -3,14 +3,14 @@
   <form (ngSubmit)="onSubmit()">
     <div class="form-group">
       <label>Name:
-        <input [(ngModel)]="issue.name" name="name" placeholder="name"/>
+        <input [(ngModel)]="issueEdit.name" name="name" placeholder="name"/>
       </label>
         <div class="error-text" *ngIf="errors['name']">{{errors['name']}}</div>
     </div>
 
     <div class="form-group">
       <label>Type:
-        <select [(ngModel)]="issue.type" name="type">
+        <select [(ngModel)]="issueEdit.type" name="type">
           <option *ngFor="let type of types" [value]="type">{{type}}</option>
         </select>
       </label>
@@ -19,7 +19,7 @@
 
     <div class="form-group">
       <label>Status:
-        <select [(ngModel)]="issue.status" name="status">
+        <select [(ngModel)]="issueEdit.status" name="status">
           <option *ngFor="let opt of statuses" [value]="opt">{{opt}}</option>
         </select>
       </label>
@@ -28,23 +28,23 @@
 
     <div class="form-group">
       <label>Assignee:
-        <select [(ngModel)]="issue.assigneeId" name="assigneeId">
+        <select [(ngModel)]="issueEdit.assigneeId" name="assigneeId">
           <option [value]="null">Unassigned</option>
           <option *ngFor="let opt of users" [value]="opt.id">{{opt.username}}</option>
         </select>
       </label>
-      <div class="error-text" *ngIf="errors['status']">{{errors['status']}}</div>
+      <div class="error-text" *ngIf="errors['assignee']">{{errors['assignee']}}</div>
     </div>
 
     <div class="form-group">
       <label>Description:
-        <textarea [(ngModel)]="issue.description" placeholder="description" name="description"></textarea>
+        <textarea [(ngModel)]="issueEdit.description" placeholder="description" name="description"></textarea>
       </label>
     </div>
 
     <div class="form-group">
       <label>Projects:
-        <select [(ngModel)]="issue.projectId" name="project">
+        <select [(ngModel)]="issueEdit.projectId" name="project">
           <option *ngFor="let project of projects" [value]="project.id">{{project.name}}</option>
         </select>
       </label>

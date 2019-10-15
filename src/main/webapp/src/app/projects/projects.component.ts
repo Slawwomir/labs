@@ -34,9 +34,6 @@ export class ProjectsComponent implements OnInit {
   }
 
   add(name: string): void {
-    name = name.trim();
-    if (!name) return;
-
     this.projectService.createProject({name, projectOwnerId: Auth.getCurrentUser().id} as Project)
       .subscribe(project => {
         this.getProjects();

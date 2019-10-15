@@ -38,6 +38,7 @@ public class IssueDTO {
     private IssueStatus status;
 
     @XmlElement
+    @NotNull(message = "issue name must be set")
     @Size(min = 2, max = 25, message = "issue name must be between 2 and 25 characters")
     private String name;
 

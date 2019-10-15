@@ -6,6 +6,8 @@ import {ProjectService} from "../../../../project.service";
 import {User, UserService} from "../shared/user.service";
 import {Auth} from "../../../../shared/utils/auth";
 import {ValidationUtils} from "../../../../shared/utils/validationUtils";
+import {Router} from "@angular/router";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-issue-edit',
@@ -25,8 +27,10 @@ export class IssueEditComponent implements OnInit {
   users: User[];
   projects: Project[];
   errors: String[];
+  issueEdit: Issue;
 
   constructor(
+    private router: Router,
     private issueService: IssueService,
     private projectService: ProjectService,
     private userService: UserService
@@ -35,7 +39,7 @@ export class IssueEditComponent implements OnInit {
 
   ngOnInit() {
     this.errors = [];
-    this.issue = Object.assign({}, this.issue);
+    this.issueEdit = Object.assign({}, this.issue);
     if (!this.statuses) {
       this.getStatuses();
     }
@@ -54,32 +58,32 @@ export class IssueEditComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.issue.id) {
-      this.updateIssue();
+    let issue: Observable<Issue>;
+    if (this.issueEdit.id) {
+      issue = this.updateIssue();
     } else {
-      this.saveIssue();
+      issue = this.saveIssue();
     }
+
+    issue.subscribe(issue => {
+      if (this.issue.projectId != issue.projectId) {
+        this.router.navigate(['projects', issue.projectId])
+      }
+      this.issueEdit = issue;
+      this.onSave.emit(issue);
+    }, error => {
+      this.errors = ValidationUtils.mapErrors(error);
+    });
+
   }
 
-  private saveIssue() {
-    this.issue.reporterId = Auth.getCurrentUser().id;
-    this.issueService.createIssue(this.issue)
-      .subscribe(issue => {
-        this.issue = issue;
-        this.onSave.emit(issue);
-      }, error => {
-        this.errors = ValidationUtils.mapErrors(error);
-      });
+  private saveIssue(): Observable<Issue> {
+    this.issueEdit.reporterId = Auth.getCurrentUser().id;
+    return this.issueService.createIssue(this.issueEdit)
   }
 
-  private updateIssue() {
-    this.issueService.updateIssue(this.issue)
-      .subscribe(issue => {
-        this.issue = issue;
-        this.onSave.emit(issue);
-      }, error => {
-        this.errors = ValidationUtils.mapErrors(error);
-      });
+  private updateIssue(): Observable<Issue> {
+    return this.issueService.updateIssue(this.issueEdit)
   }
 
   private getStatuses(): void {

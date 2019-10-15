@@ -28,6 +28,9 @@ export class ProjectDetailComponent implements OnInit {
   ngOnInit() {
     this.getProject();
     this.errors = [];
+    this.route.params.subscribe(queryParams => {
+      this.getProject();
+    })
   }
 
   getProject(): void {

@@ -13,10 +13,7 @@ import {User, UserService} from "../shared/user.service";
 export class IssueViewComponent implements OnInit {
 
   issue: Issue;
-  issueEdit: Issue;
   editMode: boolean;
-  statuses: string[];
-  types: string[];
   assignee: User;
 
   constructor(
