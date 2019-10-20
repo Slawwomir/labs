@@ -20,8 +20,8 @@ export class IssueListComponent implements OnInit, OnChanges {
   projectId: number;
   issues: Issue[];
   statuses: string[];
-  filterByStatus: String;
   errorMessages: String[];
+  filterByStatus: String = IssueListComponent.DEFAULT_SELECT;
 
   isFullCreate: boolean;
   newIssue: Issue;
@@ -34,7 +34,6 @@ export class IssueListComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    this.filterByStatus = IssueListComponent.DEFAULT_SELECT;
     this.errorMessages = [];
     this.getIssues();
     this.getStatuses();

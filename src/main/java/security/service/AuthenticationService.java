@@ -6,6 +6,8 @@ import service.UserService;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.sql.Date;
+import java.time.ZonedDateTime;
 
 @ApplicationScoped
 public class AuthenticationService {
@@ -22,5 +24,13 @@ public class AuthenticationService {
         }
 
         return null;
+    }
+
+    public User changePassword(Long userId, String password) {
+        User user = userService.findUser(userId);
+        user.getUserCredentials().setPasswordHash(CryptUtils.sha256(password));
+        user.getUserCredentials().setPasswordChangedDate(Date.from(ZonedDateTime.now().toInstant()));
+        userService.saveUserCredentials(user.getUserCredentials());
+        return user;
     }
 }

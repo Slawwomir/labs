@@ -17,6 +17,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.Provider;
+import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,11 +43,20 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         String[] header = authHeader.split(" ");
 
         if (header[0].equals("Bearer")) {
-            TokenDetails tokenDetails = tokenService.parseToken(header[1]);
-            UserCredentials userCredentials = userService.findUserCredentials(Long.valueOf(tokenDetails.getId()));
-            ApplicationUser applicationUser = getApplicationUser(userCredentials);
-            requestContext.setSecurityContext(new DefaultSecurityContext(applicationUser));
+            setSecurityContext(requestContext, header[1]);
         }
+    }
+
+    private void setSecurityContext(ContainerRequestContext requestContext, String token) {
+        TokenDetails tokenDetails = tokenService.parseToken(token);
+        UserCredentials userCredentials = userService.findUserCredentials(Long.valueOf(tokenDetails.getId()));
+
+        if (!isUserPasswordLive(tokenDetails, userCredentials)) {
+            return;
+        }
+
+        ApplicationUser applicationUser = getApplicationUser(userCredentials);
+        requestContext.setSecurityContext(new DefaultSecurityContext(applicationUser));
     }
 
     private ApplicationUser getApplicationUser(UserCredentials userCredentials) {
@@ -58,5 +68,15 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 .stream()
                 .map(Role::getRoleName)
                 .collect(Collectors.toSet());
+    }
+
+    private boolean isUserPasswordLive(TokenDetails tokenDetails, UserCredentials userCredentials) {
+        Date passwordChangedDate = userCredentials.getPasswordChangedDate();
+
+        if (passwordChangedDate == null) {
+            return true;
+        }
+
+        return tokenDetails.getIssuedTime().toInstant().isBefore(passwordChangedDate.toInstant());
     }
 }

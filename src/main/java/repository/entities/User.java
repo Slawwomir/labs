@@ -32,7 +32,7 @@ public class User implements Serializable {
     @NotNull
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "projectOwner", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "projectOwner", cascade = CascadeType.REMOVE)
     private List<Project> projects;
 
     @OneToOne(mappedBy = "user")

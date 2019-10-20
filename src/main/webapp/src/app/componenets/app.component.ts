@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {AuthService} from "../services/auth.service";
 import {Router} from "@angular/router";
+import {Role} from "../models/role";
 
 @Component({
   selector: 'app-root',
@@ -9,9 +10,10 @@ import {Router} from "@angular/router";
 })
 export class AppComponent {
   title = 'Projects Management';
+  RoleEnum = Role;
 
   constructor(
-    authService: AuthService,
+    private authService: AuthService,
     router: Router
   ) {
     if (authService.isLoggedIn()) {

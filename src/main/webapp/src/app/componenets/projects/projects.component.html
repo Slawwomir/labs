@@ -4,7 +4,7 @@
     <a routerLink="/projects/{{project.id}}">
       <span class="badge">{{project.id}}</span> {{project.name}}
     </a>
-    <button (click)="remove(project)">Remove</button>
+    <button *ngIf="authService.isUserInRole(RoleEnum.Admin)" (click)="remove(project)">Remove</button>
   </li>
 </ul>
 

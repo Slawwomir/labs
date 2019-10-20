@@ -60,6 +60,8 @@ public class ProjectService {
 
     public void removeProject(Long projectId) {
         entityManager.remove(findProject(projectId));
+        entityManager.flush();
+        entityManager.clear();
     }
 
     public Issue findIssueFromProject(Long projectId, Long issueId) {

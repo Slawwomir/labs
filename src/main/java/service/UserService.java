@@ -70,4 +70,8 @@ public class UserService {
                 .setParameter(1, userId)
                 .getSingleResult();
     }
+
+    public UserCredentials saveUserCredentials(UserCredentials userCredentials) {
+        return entityManager.merge(userCredentials);
+    }
 }

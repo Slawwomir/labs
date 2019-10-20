@@ -5,6 +5,8 @@ import {DashboardComponent} from "./componenets/dashboard/dashboard.component";
 import {ProjectDetailComponent} from "./componenets/projects/project-detail/project-detail.component";
 import {IssueViewComponent} from "./componenets/projects/project-detail/issue-list/issue-view/issue-view.component";
 import {LoginComponent} from "./componenets/login/login.component";
+import {AdminPanelComponent} from "./componenets/admin-panel/admin-panel.component";
+import {AccountManagementComponent} from "./componenets/account-management/account-management.component";
 
 const routes: Routes = [
   {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
@@ -12,7 +14,9 @@ const routes: Routes = [
   {path: 'dashboard', component: DashboardComponent},
   {path: 'issue/:id', component: IssueViewComponent},
   {path: 'projects/:id', component: ProjectDetailComponent},
-  {path: 'login', component: LoginComponent}
+  {path: 'login', component: LoginComponent},
+  {path: 'admin', component: AdminPanelComponent},
+  {path: 'account', component: AccountManagementComponent}
 ];
 
 @NgModule({

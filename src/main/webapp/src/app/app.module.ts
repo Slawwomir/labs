@@ -14,6 +14,8 @@ import {CommonModule} from "@angular/common";
 import {IssueEditComponent} from './componenets/projects/project-detail/issue-list/issue-edit/issue-edit.component';
 import {LoginComponent} from './componenets/login/login.component';
 import {AuthInterceptor} from "./auth.interceptor";
+import {AdminPanelComponent} from './componenets/admin-panel/admin-panel.component';
+import {AccountManagementComponent} from './componenets/account-management/account-management.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +26,9 @@ import {AuthInterceptor} from "./auth.interceptor";
     IssueListComponent,
     IssueViewComponent,
     IssueEditComponent,
-    LoginComponent
+    LoginComponent,
+    AdminPanelComponent,
+    AccountManagementComponent
   ],
   imports: [
     BrowserModule,

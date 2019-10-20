@@ -1,0 +1,23 @@
+<form [formGroup]="form">
+  <fieldset>
+    <legend>Change password:</legend>
+    <span *ngIf="error" class="error-text">{{error}}</span>
+    <div class="form-field">
+      <label>Type new password:
+        <input name="password_1" formControlName="password_1"
+               type="password">
+      </label>
+    </div>
+    <div class="form-field">
+      <label>Repeat:
+        <input name="password_2" formControlName="password_2"
+               type="password">
+      </label>
+    </div>
+  </fieldset>
+  <div class="form-buttons">
+    <button class="button button-primary"
+            (click)="changePassword()">Change password
+    </button>
+  </div>
+</form>

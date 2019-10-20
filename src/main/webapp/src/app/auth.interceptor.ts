@@ -7,9 +7,11 @@ import {authResult} from "./models/authResult";
 export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
-    const token = (JSON.parse(localStorage.getItem("auth_result")) as authResult).token;
+    const authResult = localStorage.getItem("auth_result");
 
-    if (token) {
+
+    if (authResult) {
+      let token = (JSON.parse(authResult) as authResult).token;
       let requestWithAuth = req.clone({
         headers: req.headers.set("Authorization", "Bearer " + token)
       });

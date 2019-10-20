@@ -7,6 +7,7 @@ import rest.resource.utils.LinksUtils;
 import rest.validation.annotations.UserExists;
 import service.UserService;
 
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -41,6 +42,7 @@ public class UserResource {
     private LinksUtils linksUtils;
 
     @GET
+    @RolesAllowed({"ADMIN", "USER"})
     public Response getUsers(
             @Context UriInfo uriInfo,
             @QueryParam("start") int start,
@@ -57,6 +59,7 @@ public class UserResource {
 
     @GET
     @Path("{userId}")
+    @RolesAllowed({"ADMIN", "USER"})
     public Response getUser(@Context UriInfo uriInfo,
                             @PathParam("userId") @UserExists Long userId) {
         User user = userService.findUser(userId);
@@ -67,6 +70,7 @@ public class UserResource {
     }
 
     @POST
+    @RolesAllowed({"ADMIN"})
     public Response addUser(@Valid UserDTO user) {
         User newUser = userService.saveUser(user);
 
@@ -74,6 +78,7 @@ public class UserResource {
     }
 
     @PUT
+    @RolesAllowed({"ADMIN"})
     public Response updateUser(@Valid UserDTO user) {
         if (user.getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -85,6 +90,7 @@ public class UserResource {
 
     @DELETE
     @Path("{userId}")
+    @RolesAllowed({"ADMIN"})
     public Response removeUser(@PathParam("userId") @UserExists Long userId) {
         userService.removeUser(userId);
         return Response.ok().build();

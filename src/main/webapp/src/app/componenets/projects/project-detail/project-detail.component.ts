@@ -5,6 +5,8 @@ import {Location} from "@angular/common";
 import {ProjectService} from "../../../services/project.service";
 import {Project} from "../../../models/project";
 import {ValidationUtils} from "../../../shared/utils/validationUtils";
+import {AuthService} from "../../../services/auth.service";
+import {Role} from "../../../models/role";
 
 @Component({
   selector: 'app-project-detail',
@@ -17,10 +19,12 @@ export class ProjectDetailComponent implements OnInit {
   projectEdit: Project;
   editMode: boolean;
   errors: String[];
+  RoleEnum = Role;
 
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
+    private authService: AuthService,
     private location: Location
   ) {
   }
@@ -54,7 +58,7 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   edit(): void {
-    this.editMode = true;
+    this.editMode = this.authService.isUserInRole(Role.Admin);
     this.errors = [];
     this.projectEdit = Object.assign({}, this.project);
   }

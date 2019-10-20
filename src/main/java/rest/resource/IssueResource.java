@@ -9,6 +9,8 @@ import rest.resource.utils.LinksUtils;
 import rest.validation.annotations.IssueExists;
 import service.IssueService;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -43,6 +45,7 @@ public class IssueResource {
     private LinksUtils linksUtils;
 
     @GET
+    @RolesAllowed({"ADMIN", "USER"})
     public Response getIssues(@Context UriInfo uriInfo,
                               @QueryParam("start") int start,
                               @QueryParam("size") @DefaultValue("2") int size) {
@@ -58,6 +61,7 @@ public class IssueResource {
     }
 
     @POST
+    @RolesAllowed({"ADMIN", "USER"})
     public Response addIssue(@Valid IssueDTO issue) {
         Issue newIssue = issueService.saveIssue(issue);
 
@@ -65,6 +69,7 @@ public class IssueResource {
     }
 
     @PUT
+    @RolesAllowed({"ADMIN", "USER"})
     public Response updateIssue(@Valid IssueDTO issue) {
         if (issue.getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -76,6 +81,7 @@ public class IssueResource {
 
     @DELETE
     @Path("{issueId}")
+    @RolesAllowed({"ADMIN", "USER"})
     public Response removeIssue(@PathParam("issueId") @IssueExists Long issueId) {
         issueService.removeIssue(issueId);
 
@@ -84,6 +90,7 @@ public class IssueResource {
 
     @GET
     @Path("{issueId}")
+    @RolesAllowed({"ADMIN", "USER"})
     public Response getIssue(@Context UriInfo uriInfo,
                              @PathParam("issueId") @IssueExists Long issueId) {
         Issue issue = issueService.findIssue(issueId);
@@ -95,6 +102,7 @@ public class IssueResource {
 
     @GET
     @Path("status")
+    @PermitAll
     public Response getStatuses() {
         List<IssueStatus> issueStatuses = issueService.getIssueStatuses();
 
@@ -103,6 +111,7 @@ public class IssueResource {
 
     @GET
     @Path("type")
+    @PermitAll
     public Response getIssueTypes() {
         List<IssueType> issueTypes = issueService.getIssueTypes();
 

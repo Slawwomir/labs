@@ -37,7 +37,7 @@ public class Project implements Serializable {
     private String name;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_owner_id")
     private User projectOwner;
 
