@@ -4,6 +4,8 @@ import {map} from "rxjs/operators";
 import {Role} from "../models/role";
 import {authResult} from "../models/authResult";
 import {Router} from "@angular/router";
+import {User} from "../models/user";
+import {UserService} from "./user.service";
 import {Observable} from "rxjs";
 
 @Injectable({
@@ -12,6 +14,7 @@ import {Observable} from "rxjs";
 export class AuthService {
 
   constructor(private httpClient: HttpClient,
+              private userService: UserService,
               private router: Router) {
   }
 
@@ -30,8 +33,12 @@ export class AuthService {
   }
 
   public isUserInRole(role: Role): boolean {
-    return (JSON.parse(localStorage.getItem('auth_result')) as authResult)
+    return this.getAuthResult()
       .roles.findIndex(r => r == role) != -1;
+  }
+
+  private getAuthResult() {
+    return JSON.parse(localStorage.getItem('auth_result')) as authResult;
   }
 
   public changePassword(password: string) {
@@ -39,9 +46,18 @@ export class AuthService {
       .pipe(map(this.setSession));
   }
 
+  public getRoles() {
+    return this.httpClient.get<Role[]>('/rest/authentication/roles');
+  }
+
+  public getLoggedInUser(): Observable<User> {
+    return this.userService.getUser(this.getAuthResult().id);
+  }
+
   private setSession(authResult): void {
     if (authResult && authResult.token) {
       localStorage.setItem('auth_result', JSON.stringify(authResult));
     }
   }
+
 }

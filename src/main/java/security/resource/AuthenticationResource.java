@@ -2,6 +2,7 @@ package security.resource;
 
 import repository.entities.User;
 import security.ApplicationUser;
+import security.domain.Role;
 import security.model.UserCredentials;
 import security.resource.dto.PasswordDTO;
 import security.resource.dto.TokenDTO;
@@ -10,11 +11,7 @@ import security.service.TokenService;
 
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -66,6 +63,12 @@ public class AuthenticationResource {
         return Response.ok(
                 new TokenDTO(token, List.copyOf(tokenService.getRoles(user)))
         ).build();
+    }
+
+    @GET
+    @Path("roles")
+    public Response getRoles() {
+        return Response.ok(Role.values()).build();
     }
 
 }

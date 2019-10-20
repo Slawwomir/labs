@@ -2,6 +2,7 @@ package rest.dto.user;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import repository.entities.Role;
 import repository.entities.User;
 import rest.validation.annotations.UserExists;
 
@@ -12,6 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -30,9 +32,13 @@ public class UserDTO {
     @XmlJavaTypeAdapter(Link.JaxbAdapter.class)
     private List<Link> links;
 
+    @XmlElement
+    private List<String> roles;
+
     public UserDTO(User user) {
         this.id = user.getId();
         this.username = user.getName();
+        this.roles = user.getUserCredentials().getRoles().stream().map(Role::getRoleName).collect(Collectors.toList());
         this.links = Collections.emptyList();
     }
 }

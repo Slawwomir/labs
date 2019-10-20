@@ -36,6 +36,8 @@ export class AccountManagementComponent implements OnInit {
     }
 
     this.authService.changePassword(passwords.password_1)
-      .subscribe();
+      .subscribe(_ => {
+        this.router.navigateByUrl("/");
+      });
   }
 }

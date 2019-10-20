@@ -1,1 +1,7 @@
-<p>admin-panel works!</p>
+<div *ngFor="let user of users">
+  <label>{{user.username}}
+    <select [(ngModel)]="authService.getUserRole(user)" name="role">
+      <option *ngFor="let role of roles" [value]="role">{{role}}</option>
+    </select>
+  </label>
+</div>
