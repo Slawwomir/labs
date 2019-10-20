@@ -16,6 +16,7 @@ import javax.enterprise.context.ApplicationScoped;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,7 @@ public class TokenService {
                     .parseClaimsJws(token)
                     .getBody();
 
-            Set<String> roles = ((Set<String>) claims.getOrDefault("roles", Set.of()));
+            Set<String> roles = Set.copyOf((List<String>) claims.getOrDefault("roles", List.of()));
             String username = claims.getSubject();
             String id = claims.getId();
             Date issuedAt = claims.getIssuedAt();

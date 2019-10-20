@@ -14,7 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Data
@@ -33,7 +33,7 @@ public class User implements Serializable {
     private String name;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "projectOwner", cascade = CascadeType.ALL)
-    private Set<Project> projects;
+    private List<Project> projects;
 
     @OneToOne(mappedBy = "user")
     private UserCredentials userCredentials;

@@ -67,6 +67,7 @@ public class UserService {
 
     public UserCredentials findUserCredentials(Long userId) {
         return entityManager.createNamedQuery("UserCredentials.findByUserId", UserCredentials.class)
+                .setParameter(1, userId)
                 .getSingleResult();
     }
 }
