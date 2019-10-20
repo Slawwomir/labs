@@ -3,7 +3,8 @@ import {Issue} from "../../../../../models/issue";
 import {IssueService} from "../../../../../services/issue.service";
 import {ActivatedRoute} from "@angular/router";
 import {Location} from "@angular/common";
-import {User, UserService} from "../../../../../services/user.service";
+import {UserService} from "../../../../../services/user.service";
+import {User} from "../../../../../models/user";
 
 @Component({
   selector: 'app-issue-view',
@@ -15,6 +16,7 @@ export class IssueViewComponent implements OnInit {
   issue: Issue;
   editMode: boolean;
   assignee: User;
+  reporter: User;
 
   constructor(
     private location: Location,
@@ -38,6 +40,7 @@ export class IssueViewComponent implements OnInit {
       .subscribe(issue => {
         this.issue = issue;
         this.getAssignee(issue);
+        this.getReporter(issue);
       });
   }
 
@@ -50,6 +53,13 @@ export class IssueViewComponent implements OnInit {
     } else {
       this.assignee = {id: null, username: "Unassigned"} as User;
     }
+  }
+
+  private getReporter(issue) {
+    this.userService.getUser(issue.reporterId)
+      .subscribe(reporter => {
+        this.reporter = reporter;
+      })
   }
 
   save(issue: Issue) {

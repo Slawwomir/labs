@@ -1,5 +1,6 @@
 package service;
 
+import repository.entities.Role;
 import repository.entities.User;
 import repository.entities.UserCredentials;
 import rest.dto.user.UserDTO;
@@ -7,7 +8,10 @@ import rest.dto.user.UserDTO;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.sql.Date;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Stateless
 public class UserService {
@@ -56,6 +60,10 @@ public class UserService {
         user.setId(userDTO.getId());
         user.setName(userDTO.getUsername());
 
+        if (userDTO.getId() != null && userDTO.getRoles() != null) {
+            setUserRoles(user, userDTO.getRoles());
+        }
+
         return saveUser(user);
     }
 
@@ -73,5 +81,25 @@ public class UserService {
 
     public UserCredentials saveUserCredentials(UserCredentials userCredentials) {
         return entityManager.merge(userCredentials);
+    }
+
+    private void setUserRoles(User user, List<String> roles) {
+        UserCredentials userCredentials = findUserCredentials(user.getId());
+        userCredentials.getRoles().forEach(
+                role -> entityManager.remove(role)
+        );
+
+        userCredentials.setRoles(roles.stream()
+                .map(roleName -> {
+                    Role role = new Role();
+                    role.setRoleName(roleName);
+                    role.setUserCredentials(userCredentials);
+                    return role;
+                })
+                .collect(Collectors.toList())
+        );
+
+        userCredentials.setChangedDate(Date.from(ZonedDateTime.now().toInstant()));
+        user.setUserCredentials(userCredentials);
     }
 }

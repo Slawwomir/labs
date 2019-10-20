@@ -2,6 +2,7 @@
   <h2>[{{issue.type}}] {{issue.name}}</h2>
   <ul>
     <li><strong>Status:</strong> {{issue.status}}</li>
+    <li><strong>Reporter:</strong> {{reporter.username}}</li>
     <li><strong>Assigned to:</strong><span *ngIf="assignee"> {{assignee.username}}</span></li>
     <li *ngIf="issue.description">{{issue.description}}</li>
     <li *ngIf="!issue.description">This issue has no description yet.</li>

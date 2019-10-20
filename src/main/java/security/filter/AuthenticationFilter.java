@@ -5,6 +5,7 @@ import repository.entities.Role;
 import repository.entities.UserCredentials;
 import security.ApplicationUser;
 import security.DefaultSecurityContext;
+import security.exception.TokenNotValidException;
 import security.model.TokenDetails;
 import security.service.TokenService;
 import service.UserService;
@@ -17,6 +18,8 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.Provider;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -51,8 +54,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         TokenDetails tokenDetails = tokenService.parseToken(token);
         UserCredentials userCredentials = userService.findUserCredentials(Long.valueOf(tokenDetails.getId()));
 
-        if (!isUserPasswordLive(tokenDetails, userCredentials)) {
-            return;
+        if (!isUserTokenLive(tokenDetails, userCredentials)) {
+            throw new TokenNotValidException("Token is invalid");
         }
 
         ApplicationUser applicationUser = getApplicationUser(userCredentials);
@@ -70,13 +73,16 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 .collect(Collectors.toSet());
     }
 
-    private boolean isUserPasswordLive(TokenDetails tokenDetails, UserCredentials userCredentials) {
-        Date passwordChangedDate = userCredentials.getPasswordChangedDate();
+    private boolean isUserTokenLive(TokenDetails tokenDetails, UserCredentials userCredentials) {
+        Date changedDate = userCredentials.getChangedDate();
 
-        if (passwordChangedDate == null) {
+        if (changedDate == null) {
             return true;
         }
 
-        return tokenDetails.getIssuedTime().toInstant().isBefore(passwordChangedDate.toInstant());
+        Instant tokenTime = tokenDetails.getIssuedTime().toInstant().truncatedTo(ChronoUnit.SECONDS);
+        Instant changeTime = changedDate.toInstant().truncatedTo(ChronoUnit.SECONDS);
+
+        return !tokenTime.isBefore(changeTime);
     }
 }

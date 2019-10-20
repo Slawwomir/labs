@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ProjectService} from "../../services/project.service";
 import {Project} from "../../models/project";
-import {Auth} from "../../shared/utils/auth";
 import {ValidationUtils} from "../../shared/utils/validationUtils";
 import {AuthService} from "../../services/auth.service";
 import {Role} from "../../models/role";
@@ -38,7 +37,7 @@ export class ProjectsComponent implements OnInit {
   }
 
   add(name: string): void {
-    this.projectService.createProject({name, projectOwnerId: Auth.getCurrentUser().id} as Project)
+    this.projectService.createProject({name, projectOwnerId: this.authService.getUserId()} as Project)
       .subscribe(project => {
         this.getProjects();
         this.errors = [];

@@ -9,7 +9,7 @@ import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import repository.entities.Role;
 import repository.entities.User;
-import security.exception.AuthorizationException;
+import security.exception.TokenNotValidException;
 import security.model.TokenDetails;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -69,7 +69,7 @@ public class TokenService {
                 | SignatureException
                 | UnsupportedJwtException
                 | IllegalArgumentException e) {
-            throw new AuthorizationException("Unable to parse token", e);
+            throw new TokenNotValidException("Unable to parse token", e);
         }
     }
 

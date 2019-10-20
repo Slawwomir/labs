@@ -4,8 +4,8 @@ import {ProjectService} from "../../../../services/project.service";
 import {Issue} from "../../../../models/issue";
 import {IssueService} from "../../../../services/issue.service";
 import {Location} from "@angular/common";
-import {Auth} from "../../../../shared/utils/auth";
 import {ValidationUtils} from "../../../../shared/utils/validationUtils";
+import {AuthService} from "../../../../services/auth.service";
 
 @Component({
   selector: 'app-issue-list',
@@ -29,6 +29,7 @@ export class IssueListComponent implements OnInit, OnChanges {
   constructor(
     private projectService: ProjectService,
     private issueService: IssueService,
+    private authService: AuthService,
     private location: Location
   ) {
   }
@@ -43,7 +44,7 @@ export class IssueListComponent implements OnInit, OnChanges {
     this.issueService.createIssue({
       name: issueName,
       projectId: this.projectId,
-      reporterId: Auth.getCurrentUser().id,
+      reporterId: this.authService.getUserId(),
       status: "OPEN",
       type: "TASK"
     } as Issue)

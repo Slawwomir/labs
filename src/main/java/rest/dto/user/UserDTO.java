@@ -38,7 +38,9 @@ public class UserDTO {
     public UserDTO(User user) {
         this.id = user.getId();
         this.username = user.getName();
-        this.roles = user.getUserCredentials().getRoles().stream().map(Role::getRoleName).collect(Collectors.toList());
+        this.roles = user.getUserCredentials().getRoles().stream()
+                .map(Role::getRoleName)
+                .collect(Collectors.toList());
         this.links = Collections.emptyList();
     }
 }

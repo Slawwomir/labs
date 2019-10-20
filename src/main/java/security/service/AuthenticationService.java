@@ -29,7 +29,7 @@ public class AuthenticationService {
     public User changePassword(Long userId, String password) {
         User user = userService.findUser(userId);
         user.getUserCredentials().setPasswordHash(CryptUtils.sha256(password));
-        user.getUserCredentials().setPasswordChangedDate(Date.from(ZonedDateTime.now().toInstant()));
+        user.getUserCredentials().setChangedDate(Date.from(ZonedDateTime.now().toInstant()));
         userService.saveUserCredentials(user.getUserCredentials());
         return user;
     }

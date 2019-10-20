@@ -37,6 +37,14 @@ export class AuthService {
       .roles.findIndex(r => r == role) != -1;
   }
 
+  public getUserId(): number {
+    return this.getAuthResult().id;
+  }
+
+  public getUsername(): string {
+    return this.getAuthResult().username;
+  }
+
   private getAuthResult() {
     return JSON.parse(localStorage.getItem('auth_result')) as authResult;
   }

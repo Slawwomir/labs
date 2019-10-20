@@ -1,7 +1,8 @@
 <div *ngFor="let user of users">
   <label>{{user.username}}
-    <select [(ngModel)]="authService.getUserRole(user)" name="role">
-      <option *ngFor="let role of roles" [value]="role">{{role}}</option>
+    <select [(ngModel)]="user.roles" name="roles" multiple>
+      <option *ngFor="let role of roles" [ngValue]="role">{{role}}</option>
     </select>
+    <button (click)="updateUser(user)">Update</button>
   </label>
 </div>

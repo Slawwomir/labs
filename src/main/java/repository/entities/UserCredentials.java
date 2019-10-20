@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -26,9 +27,9 @@ public class UserCredentials implements Serializable {
     @Column(name = "password_hash")
     private String passwordHash;
 
-    @Column(name = "password_changed_date")
-    private Date passwordChangedDate;
+    @Column(name = "changed_date")
+    private Date changedDate;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "userCredentials", cascade = CascadeType.ALL)
-    private Set<Role> roles;
+    private List<Role> roles;
 }

@@ -3,11 +3,12 @@ import {IssueService} from "../../../../../services/issue.service";
 import {Issue} from "../../../../../models/issue";
 import {Project} from "../../../../../models/project";
 import {ProjectService} from "../../../../../services/project.service";
-import {User, UserService} from "../../../../../services/user.service";
-import {Auth} from "../../../../../shared/utils/auth";
+import {UserService} from "../../../../../services/user.service";
 import {ValidationUtils} from "../../../../../shared/utils/validationUtils";
 import {Router} from "@angular/router";
 import {Observable} from "rxjs";
+import {AuthService} from "../../../../../services/auth.service";
+import {User} from "../../../../../models/user";
 
 @Component({
   selector: 'app-issue-edit',
@@ -33,7 +34,8 @@ export class IssueEditComponent implements OnInit {
     private router: Router,
     private issueService: IssueService,
     private projectService: ProjectService,
-    private userService: UserService
+    private userService: UserService,
+    private authService: AuthService
   ) {
   }
 
@@ -78,7 +80,7 @@ export class IssueEditComponent implements OnInit {
   }
 
   private saveIssue(): Observable<Issue> {
-    this.issueEdit.reporterId = Auth.getCurrentUser().id;
+    this.issueEdit.reporterId = this.authService.getUserId();
     return this.issueService.createIssue(this.issueEdit)
   }
 

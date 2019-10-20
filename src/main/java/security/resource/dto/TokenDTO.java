@@ -11,5 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TokenDTO {
     private String token;
+    private String username;
+    private Long id;
     private List<String> roles;
 }

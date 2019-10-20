@@ -45,7 +45,7 @@ public class AuthenticationResource {
 
         String token = tokenService.createTokenForUser(user);
         return Response.ok(
-                new TokenDTO(token, List.copyOf(tokenService.getRoles(user)))
+                new TokenDTO(token, user.getName(), user.getId(), List.copyOf(tokenService.getRoles(user)))
         ).build();
     }
 
@@ -61,7 +61,7 @@ public class AuthenticationResource {
         User user = authenticationService.changePassword(applicationUser.getId(), passwordDTO.getPassword());
         String token = tokenService.createTokenForUser(user);
         return Response.ok(
-                new TokenDTO(token, List.copyOf(tokenService.getRoles(user)))
+                new TokenDTO(token, user.getName(), user.getId(), List.copyOf(tokenService.getRoles(user)))
         ).build();
     }
 

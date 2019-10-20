@@ -6,10 +6,10 @@ CREATE TABLE USER
 
 CREATE TABLE USER_CREDENTIALS
 (
-    id                    INT PRIMARY KEY AUTO_INCREMENT,
-    user_id               INT NOT NULL,
-    password_hash         VARCHAR(255),
-    password_changed_date DATE,
+    id            INT PRIMARY KEY AUTO_INCREMENT,
+    user_id       INT NOT NULL,
+    password_hash VARCHAR(255),
+    changed_date  DATETIME,
     foreign key (user_id) references USER (id)
 );
 
