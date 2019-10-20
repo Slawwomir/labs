@@ -1,12 +1,12 @@
 package service;
 
 import repository.entities.User;
+import repository.entities.UserCredentials;
 import rest.dto.user.UserDTO;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.Arrays;
 import java.util.List;
 
 @Stateless
@@ -57,5 +57,16 @@ public class UserService {
         user.setName(userDTO.getUsername());
 
         return saveUser(user);
+    }
+
+    public User findUserByName(String username) {
+        return entityManager.createNamedQuery("User.findUserByName", User.class)
+                .setParameter(1, username)
+                .getSingleResult();
+    }
+
+    public UserCredentials findUserCredentials(Long userId) {
+        return entityManager.createNamedQuery("UserCredentials.findByUserId", UserCredentials.class)
+                .getSingleResult();
     }
 }

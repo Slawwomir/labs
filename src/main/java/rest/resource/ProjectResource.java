@@ -12,6 +12,7 @@ import rest.validation.annotations.ProjectExists;
 import service.IssueService;
 import service.ProjectService;
 
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -49,6 +50,7 @@ public class ProjectResource {
     private LinksUtils linksUtils;
 
     @GET
+    @RolesAllowed({"ADMIN", "USER"})
     public Response getProjects(
             @QueryParam("start") int start,
             @QueryParam("size") @DefaultValue("2") int size,
@@ -69,6 +71,7 @@ public class ProjectResource {
     }
 
     @POST
+    @RolesAllowed({"ADMIN"})
     public Response addProject(@Valid ProjectDTO project) {
         if (project.getId() != null && projectService.findProject(project.getId()) != null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -79,6 +82,7 @@ public class ProjectResource {
     }
 
     @PUT
+    @RolesAllowed({"ADMIN"})
     public Response updateProject(@Valid ProjectDTO project) {
         if (project.getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -90,6 +94,7 @@ public class ProjectResource {
 
     @DELETE
     @Path("{projectId}")
+    @RolesAllowed({"ADMIN"})
     public Response removeProject(@PathParam("projectId") @ProjectExists Long projectId) {
         projectService.removeProject(projectId);
 
@@ -98,6 +103,7 @@ public class ProjectResource {
 
     @GET
     @Path("{projectId}")
+    @RolesAllowed({"ADMIN", "USER"})
     public Response getProject(@Context UriInfo uriInfo,
                                @PathParam("projectId") @ProjectExists Long projectId) {
         Project project = projectService.findProject(projectId);
@@ -108,6 +114,7 @@ public class ProjectResource {
 
     @GET
     @Path("{projectId}/issues")
+    @RolesAllowed({"ADMIN", "USER"})
     public Response getProjectIssues(
             @Context UriInfo uriInfo,
             @PathParam("projectId") @ProjectExists Long projectId,
@@ -130,6 +137,7 @@ public class ProjectResource {
 
     @GET
     @Path("{projectId}/issues/{issueId}")
+    @RolesAllowed({"ADMIN", "USER"})
     public Response getProjectIssue(
             @Context UriInfo uriInfo,
             @PathParam("projectId") Long projectId,

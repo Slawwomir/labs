@@ -1,12 +1,27 @@
 -- USERS
 INSERT INTO USER(id, name)
-VALUES (1, 'Tytus');
+VALUES (1, 'Tytus'); -- Password = dupa
 
 INSERT INTO USER(id, name)
 VALUES (2, 'Romek');
 
 INSERT INTO USER(id, name)
 VALUES (3, 'A`Tomek');
+
+-- USER_CREDENTIALS
+
+INSERT INTO USER_CREDENTIALS(id, user_id, password_hash)
+VALUES (1, 1, '60a5d3e4100fe8afa5ee0103739a45711d50d7f3ba7280d8a95b51f5d04aa4b8');
+
+INSERT INTO USER_CREDENTIALS(id, user_id, password_hash)
+VALUES (2, 2, '60a5d3e4100fe8afa5ee0103739a45711d50d7f3ba7280d8a95b51f5d04aa4b8');
+
+-- ROLE
+INSERT INTO ROLE(user_credentials_id, role_name)
+VALUES (1, 'ADMIN');
+
+INSERT INTO ROLE(user_credentials_id, role_name)
+VALUES (2, 'USER');
 
 -- PROJECTS
 INSERT INTO PROJECT(id, name, project_owner_id)

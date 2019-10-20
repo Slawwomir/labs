@@ -1,7 +1,16 @@
 CREATE TABLE USER
 (
     id   INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255)
+    name VARCHAR(255),
+);
+
+CREATE TABLE USER_CREDENTIALS
+(
+    id                    INT PRIMARY KEY AUTO_INCREMENT,
+    user_id               INT NOT NULL,
+    password_hash         VARCHAR(255),
+    password_changed_date DATE,
+    foreign key (user_id) references USER (id)
 );
 
 CREATE TABLE PROJECT
@@ -25,4 +34,12 @@ CREATE TABLE ISSUE
     foreign key (project_id) references PROJECT (id),
     foreign key (reporter_id) references USER (id),
     foreign key (assignee_id) references USER (id)
+);
+
+CREATE TABLE ROLE
+(
+    id                  INT PRIMARY KEY AUTO_INCREMENT,
+    user_credentials_id INT          NOT NULL,
+    role_name           VARCHAR(255) NOT NULL,
+    foreign key (user_credentials_id) references USER_CREDENTIALS (id)
 );

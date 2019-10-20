@@ -17,7 +17,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @NamedQueries({
@@ -41,7 +41,7 @@ public class Project implements Serializable {
     @JoinColumn(name = "project_owner_id")
     private User projectOwner;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "project")
-    private List<Issue> issues;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, mappedBy = "project")
+    private Set<Issue> issues;
 
 }
