@@ -16,15 +16,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import java.util.List;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Consumes(APPLICATION_JSON)
 @Produces(APPLICATION_JSON)
 @Path("authentication")
 public class AuthenticationResource {
-
-    @Context
-    private SecurityContext securityContext;
 
     @Inject
     private TokenService tokenService;
@@ -37,7 +36,9 @@ public class AuthenticationResource {
     public Response authenticate(UserCredentials userCredentials) {
         User user = authenticationService.validateCredentials(userCredentials);
         String token = tokenService.createTokenForUser(user);
-        return Response.ok(new TokenDTO(token)).build();
+        return Response.ok(
+                new TokenDTO(token, List.copyOf(tokenService.getRoles(user)))
+        ).build();
     }
 
 }

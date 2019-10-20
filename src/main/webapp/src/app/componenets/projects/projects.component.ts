@@ -3,6 +3,8 @@ import {ProjectService} from "../../services/project.service";
 import {Project} from "../../models/project";
 import {Auth} from "../../shared/utils/auth";
 import {ValidationUtils} from "../../shared/utils/validationUtils";
+import {AuthService} from "../../services/auth.service";
+import {Role} from "../../models/role";
 
 @Component({
   selector: 'app-projects',
@@ -14,8 +16,10 @@ export class ProjectsComponent implements OnInit {
 
   projects: Project[];
   errors: String[];
+  RoleEnum = Role;
 
-  constructor(private projectService: ProjectService) {
+  constructor(private projectService: ProjectService,
+              private authService: AuthService) {
   }
 
   ngOnInit() {

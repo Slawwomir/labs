@@ -73,13 +73,13 @@ public class TokenService {
         }
     }
 
-    private ZonedDateTime getIssuedTime(Date issuedAt) {
-        return ZonedDateTime.ofInstant(issuedAt.toInstant(), ZoneId.systemDefault());
-    }
-
-    private Set<String> getRoles(User user) {
+    public Set<String> getRoles(User user) {
         return user.getUserCredentials().getRoles().stream()
                 .map(Role::getRoleName)
                 .collect(Collectors.toSet());
+    }
+
+    private ZonedDateTime getIssuedTime(Date issuedAt) {
+        return ZonedDateTime.ofInstant(issuedAt.toInstant(), ZoneId.systemDefault());
     }
 }
