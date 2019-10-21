@@ -16,6 +16,7 @@ import {LoginComponent} from './componenets/login/login.component';
 import {AuthInterceptor} from "./auth.interceptor";
 import {AdminPanelComponent} from './componenets/admin-panel/admin-panel.component';
 import {AccountManagementComponent} from './componenets/account-management/account-management.component';
+import {RegistrationComponent} from './componenets/registration/registration.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import {AccountManagementComponent} from './componenets/account-management/accou
     IssueEditComponent,
     LoginComponent,
     AdminPanelComponent,
-    AccountManagementComponent
+    AccountManagementComponent,
+    RegistrationComponent
   ],
   imports: [
     BrowserModule,

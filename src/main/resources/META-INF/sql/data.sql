@@ -16,12 +16,18 @@ VALUES (1, 1, '60a5d3e4100fe8afa5ee0103739a45711d50d7f3ba7280d8a95b51f5d04aa4b8'
 INSERT INTO USER_CREDENTIALS(id, user_id, password_hash)
 VALUES (2, 2, '60a5d3e4100fe8afa5ee0103739a45711d50d7f3ba7280d8a95b51f5d04aa4b8');
 
+INSERT INTO USER_CREDENTIALS(id, user_id, password_hash)
+VALUES (3, 3, '60a5d3e4100fe8afa5ee0103739a45711d50d7f3ba7280d8a95b51f5d04aa4b8');
+
 -- ROLE
 INSERT INTO ROLE(user_credentials_id, role_name)
 VALUES (1, 'ADMIN');
 
 INSERT INTO ROLE(user_credentials_id, role_name)
 VALUES (2, 'USER');
+
+INSERT INTO ROLE(user_credentials_id, role_name)
+VALUES (3, 'USER');
 
 -- PROJECTS
 INSERT INTO PROJECT(id, name, project_owner_id)

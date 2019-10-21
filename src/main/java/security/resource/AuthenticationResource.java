@@ -8,6 +8,7 @@ import security.resource.dto.PasswordDTO;
 import security.resource.dto.TokenDTO;
 import security.service.AuthenticationService;
 import security.service.TokenService;
+import service.UserService;
 
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
@@ -30,6 +31,9 @@ public class AuthenticationResource {
 
     @Inject
     private TokenService tokenService;
+
+    @Inject
+    private UserService userService;
 
     @Inject
     private AuthenticationService authenticationService;
@@ -67,8 +71,23 @@ public class AuthenticationResource {
 
     @GET
     @Path("roles")
+    @PermitAll
     public Response getRoles() {
         return Response.ok(Role.values()).build();
     }
 
+    @POST
+    @Path("account")
+    @PermitAll
+    public Response createAccount(UserCredentials userCredentials) {
+        User userByName = userService.findUserByName(userCredentials.getUsername());
+
+        if (userByName != null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("This username is not available").build();
+        }
+
+        User user = userService.createUser(userCredentials);
+
+        return Response.ok(user).build();
+    }
 }

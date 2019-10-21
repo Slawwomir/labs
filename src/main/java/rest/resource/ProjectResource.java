@@ -59,6 +59,7 @@ public class ProjectResource {
             size = Integer.MAX_VALUE;
         }
 
+
         List<ProjectDTO> projects = projectService.findProjects(start, size).stream()
                 .map(ProjectDTO::new)
                 .collect(Collectors.toList());

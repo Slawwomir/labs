@@ -1,5 +1,6 @@
 <div *ngFor="let user of users">
-  <label>{{user.username}}
+  <p>{{user.username}}</p>
+  <label>
     <select [(ngModel)]="user.roles" name="roles" multiple>
       <option *ngFor="let role of roles" [ngValue]="role">{{role}}</option>
     </select>

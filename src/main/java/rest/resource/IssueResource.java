@@ -5,6 +5,7 @@ import rest.dto.issue.IssueDTO;
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
 import rest.dto.issue.IssuesDTO;
+import rest.resource.interceptors.IssueInterceptor;
 import rest.resource.utils.LinksUtils;
 import rest.validation.annotations.IssueExists;
 import service.IssueService;
@@ -13,6 +14,7 @@ import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.interceptor.Interceptors;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -28,6 +30,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +40,9 @@ import java.util.stream.Collectors;
 @Consumes(MediaType.APPLICATION_JSON)
 @RequestScoped
 public class IssueResource {
+
+    @Context
+    private SecurityContext securityContext;
 
     @Inject
     private IssueService issueService;
@@ -62,6 +68,7 @@ public class IssueResource {
 
     @POST
     @RolesAllowed({"ADMIN", "USER"})
+    @Interceptors(IssueInterceptor.class)
     public Response addIssue(@Valid IssueDTO issue) {
         Issue newIssue = issueService.saveIssue(issue);
 
@@ -116,5 +123,9 @@ public class IssueResource {
         List<IssueType> issueTypes = issueService.getIssueTypes();
 
         return Response.ok(issueTypes).build();
+    }
+
+    public SecurityContext getSecurityContext() {
+        return securityContext;
     }
 }

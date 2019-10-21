@@ -43,18 +43,13 @@ public class UserResource {
 
     @GET
     @RolesAllowed({"ADMIN", "USER"})
-    public Response getUsers(
-            @Context UriInfo uriInfo,
-            @QueryParam("start") int start,
-            @QueryParam("size") @DefaultValue("2") int size) {
-        List<UserDTO> allUsers = userService.findUsers(start, size).stream()
+    public Response getUsers() {
+
+        List<UserDTO> allUsers = userService.findAllUsers().stream()
                 .map(UserDTO::new)
                 .collect(Collectors.toList());
 
-        allUsers.forEach(user -> linksUtils.setLinksForUser(uriInfo, user));
-        List<Link> links = linksUtils.getLinksForPagination(uriInfo, start, size, userService.getUsersCount());
-
-        return Response.ok(new UsersDTO(allUsers, links)).build();
+        return Response.ok(new UsersDTO(allUsers, null)).build();
     }
 
     @GET

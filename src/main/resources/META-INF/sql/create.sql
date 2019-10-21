@@ -43,3 +43,11 @@ CREATE TABLE ROLE
     role_name           VARCHAR(255) NOT NULL,
     foreign key (user_credentials_id) references USER_CREDENTIALS (id)
 );
+
+CREATE TABLE PERMISSION
+(
+    id               INT PRIMARY KEY AUTO_INCREMENT,
+    role_name        VARCHAR(255) NOT NULL,
+    method_name      VARCHAR(255) NOT NULL,
+    permission_level VARCHAR(255) NOT NULL
+);

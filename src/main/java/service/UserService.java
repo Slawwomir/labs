@@ -4,6 +4,7 @@ import repository.entities.Role;
 import repository.entities.User;
 import repository.entities.UserCredentials;
 import rest.dto.user.UserDTO;
+import security.service.CryptUtils;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -68,9 +69,15 @@ public class UserService {
     }
 
     public User findUserByName(String username) {
-        return entityManager.createNamedQuery("User.findUserByName", User.class)
+        List<User> resultList = entityManager.createNamedQuery("User.findUserByName", User.class)
                 .setParameter(1, username)
-                .getSingleResult();
+                .getResultList();
+
+        if (resultList.isEmpty()) {
+            return null;
+        }
+
+        return resultList.get(0);
     }
 
     public UserCredentials findUserCredentials(Long userId) {
@@ -81,6 +88,15 @@ public class UserService {
 
     public UserCredentials saveUserCredentials(UserCredentials userCredentials) {
         return entityManager.merge(userCredentials);
+    }
+
+    public Role saveRole(Role role) {
+        if (role.getId() == null) {
+            entityManager.persist(role);
+            return role;
+        } else {
+            return entityManager.merge(role);
+        }
     }
 
     private void setUserRoles(User user, List<String> roles) {
@@ -101,5 +117,23 @@ public class UserService {
 
         userCredentials.setChangedDate(Date.from(ZonedDateTime.now().toInstant()));
         user.setUserCredentials(userCredentials);
+    }
+
+    public User createUser(security.model.UserCredentials userCredentials) {
+        User user = new User();
+        user.setName(userCredentials.getUsername());
+        user = saveUser(user);
+
+        UserCredentials userCredentialsEntity = new UserCredentials();
+        userCredentialsEntity.setPasswordHash(userCredentials.getPasswordHash());
+        userCredentialsEntity.setUser(user);
+        userCredentialsEntity = saveUserCredentials(userCredentialsEntity);
+
+        Role role = new Role();
+        role.setRoleName("USER");
+        role.setUserCredentials(userCredentialsEntity);
+        saveRole(role);
+
+        return this.saveUser(user);
     }
 }
