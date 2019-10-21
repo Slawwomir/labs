@@ -3,6 +3,7 @@ package repository.entities;
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
 import lombok.Data;
+import repository.Possessable;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -28,7 +29,7 @@ import java.io.Serializable;
         @NamedQuery(name = "Issue.remove", query = "DELETE FROM Issue i where i.id = ?1"),
         @NamedQuery(name = "Issue.findByIssueIdAndProjectId", query = "SELECT i FROM Issue i WHERE i.id = ?1 and i.project.id = ?2")
 })
-public class Issue implements Serializable {
+public class Issue implements Serializable, Possessable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,4 +59,9 @@ public class Issue implements Serializable {
     private IssueStatus status;
 
     private String description;
+
+    @Override
+    public Long getOwnerId() {
+        return reporter.getId();
+    }
 }

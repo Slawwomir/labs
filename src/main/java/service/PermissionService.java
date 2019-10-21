@@ -1,5 +1,6 @@
 package service;
 
+import repository.Possessable;
 import repository.entities.Issue;
 import repository.entities.Permission;
 import repository.entities.Role;
@@ -24,6 +25,11 @@ public class PermissionService {
 
     public boolean hasUserPermissionToIssue(Long userId, Long issueId, String methodName) {
         List<Role> roles = userService.findUser(userId).getUserCredentials().getRoles();
+        Issue issue = issueService.findIssue(issueId);
+
+        if (issue == null) {
+            return false;
+        }
 
         return roles.stream().anyMatch(role -> {
             Permission permission = findPermissionByRoleAndMethod(role.getRoleName(), methodName);
@@ -32,17 +38,16 @@ public class PermissionService {
                 return false;
             }
 
-            return checkPermission(userId, issueId, permission);
+            return checkPermission(userId, issue, permission);
         });
     }
 
-    private boolean checkPermission(Long userId, Long issueId, Permission permission) {
+    private boolean checkPermission(Long userId, Possessable possessable, Permission permission) {
         switch (permission.getPermissionLevel()) {
             case GRANTED:
                 return true;
             case IF_OWNER:
-                Issue issue = issueService.findIssue(issueId);
-                return issue.getReporter().getId().equals(userId);
+                return possessable.getOwnerId().equals(userId);
             default:
                 return false;
         }

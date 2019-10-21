@@ -3,6 +3,7 @@ package repository.entities;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import repository.Possessable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -27,7 +28,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Project implements Serializable {
+public class Project implements Serializable, Possessable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,4 +45,8 @@ public class Project implements Serializable {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "project")
     private List<Issue> issues;
 
+    @Override
+    public Long getOwnerId() {
+        return projectOwner.getId();
+    }
 }

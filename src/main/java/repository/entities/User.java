@@ -1,6 +1,7 @@
 package repository.entities;
 
 import lombok.Data;
+import repository.Possessable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -23,7 +24,7 @@ import java.util.List;
         @NamedQuery(name = "User.remove", query = "DELETE FROM User u where u.id = ?1"),
         @NamedQuery(name = "User.findUserByName", query = " SELECT u FROM User u where u.name = ?1")
 })
-public class User implements Serializable {
+public class User implements Serializable, Possessable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,4 +38,9 @@ public class User implements Serializable {
 
     @OneToOne(mappedBy = "user")
     private UserCredentials userCredentials;
+
+    @Override
+    public Long getOwnerId() {
+        return id;
+    }
 }
