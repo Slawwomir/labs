@@ -1,7 +1,7 @@
 package domain.permission;
 
 public enum PermissionLevel {
-    IF_OWNER,
     GRANTED,
+    IF_OWNER,
     DENIED
 }

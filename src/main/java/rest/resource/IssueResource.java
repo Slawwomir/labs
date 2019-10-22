@@ -5,13 +5,17 @@ import rest.dto.issue.IssueDTO;
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
 import rest.dto.issue.IssuesDTO;
+import rest.resource.annotations.HideForPermission;
 import rest.resource.interceptors.IssueInterceptor;
+import rest.resource.interceptors.MethodInterceptor;
 import rest.resource.utils.LinksUtils;
 import rest.validation.annotations.IssueExists;
+import rest.resource.annotations.IssueId;
+import security.ApplicationUser;
 import service.IssueService;
+import service.PermissionService;
 
 import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
@@ -39,7 +43,7 @@ import java.util.stream.Collectors;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @RequestScoped
-public class IssueResource {
+public class IssueResource implements Secured {
 
     @Context
     private SecurityContext securityContext;
@@ -50,12 +54,18 @@ public class IssueResource {
     @Inject
     private LinksUtils linksUtils;
 
+    @Inject
+    private PermissionService permissionService;
+
     @GET
-    @RolesAllowed({"ADMIN", "USER"})
+    @HideForPermission
     public Response getIssues(@Context UriInfo uriInfo,
                               @QueryParam("start") int start,
                               @QueryParam("size") @DefaultValue("2") int size) {
+        ApplicationUser user = (ApplicationUser) securityContext.getUserPrincipal();
+
         List<IssueDTO> issues = issueService.findIssues(start, size).stream()
+                .filter(issue -> permissionService.hasUserPermissionToIssue(user.getId(), issue.getId(), "getIssue"))
                 .map(IssueDTO::new)
                 .collect(Collectors.toList());
 
@@ -67,8 +77,7 @@ public class IssueResource {
     }
 
     @POST
-    @RolesAllowed({"ADMIN", "USER"})
-    @Interceptors(IssueInterceptor.class)
+    @Interceptors(MethodInterceptor.class)
     public Response addIssue(@Valid IssueDTO issue) {
         Issue newIssue = issueService.saveIssue(issue);
 
@@ -76,7 +85,7 @@ public class IssueResource {
     }
 
     @PUT
-    @RolesAllowed({"ADMIN", "USER"})
+    @Interceptors(IssueInterceptor.class)
     public Response updateIssue(@Valid IssueDTO issue) {
         if (issue.getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -88,8 +97,8 @@ public class IssueResource {
 
     @DELETE
     @Path("{issueId}")
-    @RolesAllowed({"ADMIN", "USER"})
-    public Response removeIssue(@PathParam("issueId") @IssueExists Long issueId) {
+    @Interceptors(IssueInterceptor.class)
+    public Response removeIssue(@PathParam("issueId") @IssueExists @IssueId Long issueId) {
         issueService.removeIssue(issueId);
 
         return Response.ok().build();
@@ -97,9 +106,9 @@ public class IssueResource {
 
     @GET
     @Path("{issueId}")
-    @RolesAllowed({"ADMIN", "USER"})
+    @Interceptors(IssueInterceptor.class)
     public Response getIssue(@Context UriInfo uriInfo,
-                             @PathParam("issueId") @IssueExists Long issueId) {
+                             @PathParam("issueId") @IssueExists @IssueId Long issueId) {
         Issue issue = issueService.findIssue(issueId);
         IssueDTO issueDTO = new IssueDTO(issue);
         linksUtils.setLinksForIssue(uriInfo, issueDTO);
@@ -125,6 +134,8 @@ public class IssueResource {
         return Response.ok(issueTypes).build();
     }
 
+    @Override
+    @HideForPermission
     public SecurityContext getSecurityContext() {
         return securityContext;
     }

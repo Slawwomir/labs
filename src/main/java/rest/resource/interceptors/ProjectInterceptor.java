@@ -1,9 +1,9 @@
 package rest.resource.interceptors;
 
-import rest.dto.issue.IssueDTO;
+import rest.dto.project.ProjectDTO;
 import rest.resource.Secured;
-import rest.resource.exceptions.IssueNotFoundException;
-import rest.resource.annotations.IssueId;
+import rest.resource.annotations.ProjectId;
+import rest.resource.exceptions.ProjectNotFoundException;
 import security.ApplicationUser;
 import service.PermissionService;
 
@@ -18,18 +18,18 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
-public class IssueInterceptor {
+public class ProjectInterceptor {
 
     @Inject
     private PermissionService permissionService;
 
     @AroundInvoke
     public Object checkPermission(InvocationContext invocationContext) throws Exception {
-        Long issueId = getIssueId(invocationContext);
+        Long projectId = getProjectId(invocationContext);
         ApplicationUser applicationUser = getApplicationUser(invocationContext);
-        String methodName = invocationContext.getMethod().getName();
+        String methodName = cutMethodName(invocationContext.getMethod().getName());
 
-        if (!permissionService.hasUserPermissionToIssue(applicationUser.getId(), issueId, methodName)) {
+        if (!permissionService.hasUserPermissionToProject(applicationUser.getId(), projectId, methodName)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
@@ -42,33 +42,41 @@ public class IssueInterceptor {
         return (ApplicationUser) securityContext.getUserPrincipal();
     }
 
-    private Long getIssueId(InvocationContext invocationContext) {
-        Optional<Long> issueId = Arrays.stream(invocationContext.getParameters())
-                .filter(parameter -> parameter instanceof IssueDTO)
+    private Long getProjectId(InvocationContext invocationContext) {
+        Optional<Long> projectId = Arrays.stream(invocationContext.getParameters())
+                .filter(parameter -> parameter instanceof ProjectDTO)
                 .findAny()
-                .map(issue -> ((IssueDTO) issue).getId());
+                .map(project -> ((ProjectDTO) project).getId());
 
-        if (issueId.isPresent()) {
-            return issueId.get();
+        if (projectId.isPresent()) {
+            return projectId.get();
         }
 
         Annotation[][] parameterAnnotations = invocationContext.getMethod().getParameterAnnotations();
         OptionalInt index = IntStream.range(0, parameterAnnotations.length)
-                .filter(i -> hasIssueIdAnnotation(parameterAnnotations[i]))
+                .filter(i -> hasProjectIdAnnotation(parameterAnnotations[i]))
                 .findAny();
 
         if (index.isPresent()) {
             return (Long) invocationContext.getParameters()[index.getAsInt()];
         }
 
-        throw new IssueNotFoundException(
-                String.format("Method %s doesn't contain an issue or issue id in parameters",
+        throw new ProjectNotFoundException(
+                String.format("Method %s doesn't contain a project or project id in parameters",
                         invocationContext.getMethod().getName())
         );
     }
 
-    private boolean hasIssueIdAnnotation(Annotation[] parameterAnnotation) {
+    private boolean hasProjectIdAnnotation(Annotation[] parameterAnnotation) {
         return Arrays.stream(parameterAnnotation)
-                .anyMatch(annotation -> ((Annotation) annotation).annotationType().equals(IssueId.class));
+                .anyMatch(annotation -> ((Annotation) annotation).annotationType().equals(ProjectId.class));
+    }
+
+    private String cutMethodName(String methodName) {
+        if (methodName.startsWith("getProject")) {
+            return "getProject";
+        }
+
+        return methodName;
     }
 }

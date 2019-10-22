@@ -2,9 +2,7 @@ package service;
 
 import domain.permission.PermissionLevel;
 import repository.Possessable;
-import repository.entities.Issue;
-import repository.entities.Permission;
-import repository.entities.Role;
+import repository.entities.*;
 import rest.dto.permission.PermissionDTO;
 
 import javax.ejb.Stateless;
@@ -23,13 +21,68 @@ public class PermissionService {
     private UserService userService;
 
     @Inject
+    private ProjectService projectService;
+
+    @Inject
     private IssueService issueService;
 
     public boolean hasUserPermissionToIssue(Long userId, Long issueId, String methodName) {
         List<Role> roles = userService.findUser(userId).getUserCredentials().getRoles();
         Issue issue = issueService.findIssue(issueId);
 
-        if (issue == null) {
+        return checkPermissionForEntity(userId, methodName, roles, issue);
+    }
+
+    public boolean hasUserPermissionToUser(Long requesterId, Long userId, String methodName) {
+        List<Role> roles = userService.findUser(requesterId).getUserCredentials().getRoles();
+        User user = userService.findUser(userId);
+
+        return checkPermissionForEntity(userId, methodName, roles, user);
+    }
+
+    public boolean hasUserPermissionToProject(Long userId, Long projectId, String methodName) {
+        List<Role> roles = userService.findUser(userId).getUserCredentials().getRoles();
+        Project project = projectService.findProject(projectId);
+
+        return checkPermissionForEntity(userId, methodName, roles, project);
+    }
+
+    public List<Permission> findPermissions() {
+        return entityManager.createNamedQuery("Permission.findAll", Permission.class).getResultList();
+    }
+
+    public Permission savePermission(PermissionDTO permissionDTO) {
+        Permission permission = new Permission();
+        permission.setMethodName(permissionDTO.getMethodName());
+        permission.setPermissionLevel(PermissionLevel.valueOf(permissionDTO.getPermissionLevel()));
+        permission.setRoleName(permissionDTO.getRoleName());
+
+        entityManager.persist(permission);
+
+        return permission;
+    }
+
+    public void removePermission(Long permissionId) {
+        Permission permission = entityManager.find(Permission.class, permissionId);
+        entityManager.remove(permission);
+    }
+
+    public boolean hasUserPermissionToMethod(Long userId, String methodName) {
+        List<Role> roles = userService.findUser(userId).getUserCredentials().getRoles();
+
+        return roles.stream().anyMatch(role -> {
+            Permission permissionForMethod = findPermissionByRoleAndMethod(role.getRoleName(), methodName);
+
+            if (permissionForMethod != null) {
+                return permissionForMethod.getPermissionLevel() == PermissionLevel.GRANTED;
+            }
+
+            return false;
+        });
+    }
+
+    private boolean checkPermissionForEntity(Long userId, String methodName, List<Role> roles, Possessable entity) {
+        if (entity == null) {
             return false;
         }
 
@@ -40,7 +93,7 @@ public class PermissionService {
                 return false;
             }
 
-            return checkPermission(userId, issue, permission);
+            return checkPermission(userId, entity, permission);
         });
     }
 
@@ -66,25 +119,5 @@ public class PermissionService {
         }
 
         return permissions.get(0);
-    }
-
-    public List<Permission> findPermissions() {
-        return entityManager.createNamedQuery("Permission.findAll", Permission.class).getResultList();
-    }
-
-    public Permission savePermission(PermissionDTO permissionDTO) {
-        Permission permission = new Permission();
-        permission.setMethodName(permissionDTO.getMethodName());
-        permission.setPermissionLevel(PermissionLevel.valueOf(permissionDTO.getPermissionLevel()));
-        permission.setRoleName(permissionDTO.getRoleName());
-
-        entityManager.persist(permission);
-
-        return permission;
-    }
-
-    public void removePermission(Long permissionId) {
-        Permission permission = entityManager.find(Permission.class, permissionId);
-        entityManager.remove(permission);
     }
 }

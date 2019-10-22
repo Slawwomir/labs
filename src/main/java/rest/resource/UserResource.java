@@ -3,13 +3,20 @@ package rest.resource;
 import repository.entities.User;
 import rest.dto.user.UserDTO;
 import rest.dto.user.UsersDTO;
+import rest.resource.annotations.HideForPermission;
+import rest.resource.annotations.UserId;
+import rest.resource.interceptors.MethodInterceptor;
+import rest.resource.interceptors.UserInterceptor;
 import rest.resource.utils.LinksUtils;
 import rest.validation.annotations.UserExists;
+import security.ApplicationUser;
+import service.PermissionService;
 import service.UserService;
 
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.interceptor.Interceptors;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -21,11 +28,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Link;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +36,10 @@ import java.util.stream.Collectors;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("users")
-public class UserResource {
+public class UserResource implements Secured {
+
+    @Context
+    private SecurityContext securityContext;
 
     @Inject
     private UserService userService;
@@ -41,11 +47,16 @@ public class UserResource {
     @Inject
     private LinksUtils linksUtils;
 
+    @Inject
+    private PermissionService permissionService;
+
     @GET
-    @RolesAllowed({"ADMIN", "USER"})
+    @HideForPermission
     public Response getUsers() {
+        ApplicationUser applicationUser = (ApplicationUser) securityContext.getUserPrincipal();
 
         List<UserDTO> allUsers = userService.findAllUsers().stream()
+                .filter(user -> permissionService.hasUserPermissionToUser(applicationUser.getId(), user.getId(), "getUser"))
                 .map(UserDTO::new)
                 .collect(Collectors.toList());
 
@@ -54,7 +65,7 @@ public class UserResource {
 
     @GET
     @Path("{userId}")
-    @RolesAllowed({"ADMIN", "USER"})
+    @Interceptors(UserInterceptor.class)
     public Response getUser(@Context UriInfo uriInfo,
                             @PathParam("userId") @UserExists Long userId) {
         User user = userService.findUser(userId);
@@ -65,7 +76,7 @@ public class UserResource {
     }
 
     @POST
-    @RolesAllowed({"ADMIN"})
+    @Interceptors(MethodInterceptor.class)
     public Response addUser(@Valid UserDTO user) {
         User newUser = userService.saveUser(user);
 
@@ -73,7 +84,7 @@ public class UserResource {
     }
 
     @PUT
-    @RolesAllowed({"ADMIN"})
+    @Interceptors(UserInterceptor.class)
     public Response updateUser(@Valid UserDTO user) {
         if (user.getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -85,9 +96,15 @@ public class UserResource {
 
     @DELETE
     @Path("{userId}")
-    @RolesAllowed({"ADMIN"})
-    public Response removeUser(@PathParam("userId") @UserExists Long userId) {
+    @Interceptors(UserInterceptor.class)
+    public Response removeUser(@PathParam("userId") @UserExists @UserId Long userId) {
         userService.removeUser(userId);
         return Response.ok().build();
+    }
+
+    @Override
+    @HideForPermission
+    public SecurityContext getSecurityContext() {
+        return securityContext;
     }
 }

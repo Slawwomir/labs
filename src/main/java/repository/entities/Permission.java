@@ -3,13 +3,7 @@ package repository.entities;
 import domain.permission.PermissionLevel;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -34,5 +28,6 @@ public class Permission {
 
     @NotNull
     @Column(name = "permission_level")
+    @Enumerated(EnumType.STRING)
     private PermissionLevel permissionLevel;
 }

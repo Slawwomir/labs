@@ -1,9 +1,9 @@
 package rest.resource.interceptors;
 
-import rest.dto.issue.IssueDTO;
+import rest.dto.user.UserDTO;
 import rest.resource.Secured;
-import rest.resource.exceptions.IssueNotFoundException;
-import rest.resource.annotations.IssueId;
+import rest.resource.exceptions.UserNotFoundException;
+import rest.resource.annotations.UserId;
 import security.ApplicationUser;
 import service.PermissionService;
 
@@ -18,18 +18,18 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
-public class IssueInterceptor {
+public class UserInterceptor {
 
     @Inject
     private PermissionService permissionService;
 
     @AroundInvoke
     public Object checkPermission(InvocationContext invocationContext) throws Exception {
-        Long issueId = getIssueId(invocationContext);
+        Long userId = getUserId(invocationContext);
         ApplicationUser applicationUser = getApplicationUser(invocationContext);
         String methodName = invocationContext.getMethod().getName();
 
-        if (!permissionService.hasUserPermissionToIssue(applicationUser.getId(), issueId, methodName)) {
+        if (!permissionService.hasUserPermissionToUser(applicationUser.getId(), userId, methodName)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
@@ -42,33 +42,33 @@ public class IssueInterceptor {
         return (ApplicationUser) securityContext.getUserPrincipal();
     }
 
-    private Long getIssueId(InvocationContext invocationContext) {
-        Optional<Long> issueId = Arrays.stream(invocationContext.getParameters())
-                .filter(parameter -> parameter instanceof IssueDTO)
+    private Long getUserId(InvocationContext invocationContext) {
+        Optional<Long> userId = Arrays.stream(invocationContext.getParameters())
+                .filter(parameter -> parameter instanceof UserDTO)
                 .findAny()
-                .map(issue -> ((IssueDTO) issue).getId());
+                .map(user -> ((UserDTO) user).getId());
 
-        if (issueId.isPresent()) {
-            return issueId.get();
+        if (userId.isPresent()) {
+            return userId.get();
         }
 
         Annotation[][] parameterAnnotations = invocationContext.getMethod().getParameterAnnotations();
         OptionalInt index = IntStream.range(0, parameterAnnotations.length)
-                .filter(i -> hasIssueIdAnnotation(parameterAnnotations[i]))
+                .filter(i -> hasUserIdAnnotation(parameterAnnotations[i]))
                 .findAny();
 
         if (index.isPresent()) {
             return (Long) invocationContext.getParameters()[index.getAsInt()];
         }
 
-        throw new IssueNotFoundException(
-                String.format("Method %s doesn't contain an issue or issue id in parameters",
+        throw new UserNotFoundException(
+                String.format("Method %s doesn't contain an user or user id in parameters",
                         invocationContext.getMethod().getName())
         );
     }
 
-    private boolean hasIssueIdAnnotation(Annotation[] parameterAnnotation) {
+    private boolean hasUserIdAnnotation(Annotation[] parameterAnnotation) {
         return Arrays.stream(parameterAnnotation)
-                .anyMatch(annotation -> ((Annotation) annotation).annotationType().equals(IssueId.class));
+                .anyMatch(annotation -> ((Annotation) annotation).annotationType().equals(UserId.class));
     }
 }
