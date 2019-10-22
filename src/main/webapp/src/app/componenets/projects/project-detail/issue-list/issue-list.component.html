@@ -11,10 +11,10 @@
     <a routerLink="/issue/{{issue.id}}">
       <span class="badge">{{issue.id}}</span> {{issue.name}}
     </a>
-    <button (click)="remove(issue)">Remove</button>
+    <button *ngIf="canRemoveIssue(issue.reporterId)" (click)="remove(issue)">Remove</button>
   </li>
 </ul>
-<div>
+<div *ngIf="canAddIssue()">
   <label><input #issueName placeholder="What has to be done?"/></label>
   <button (click)="add(issueName.value); issueName.value=''">
     Create

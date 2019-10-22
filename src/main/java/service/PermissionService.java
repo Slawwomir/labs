@@ -108,7 +108,7 @@ public class PermissionService {
         }
     }
 
-    private Permission findPermissionByRoleAndMethod(String roleName, String methodName) {
+    public Permission findPermissionByRoleAndMethod(String roleName, String methodName) {
         List<Permission> permissions = entityManager.createNamedQuery("Permission.findByRoleAndMethod", Permission.class)
                 .setParameter(1, roleName)
                 .setParameter(2, methodName)

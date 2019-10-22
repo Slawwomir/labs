@@ -108,7 +108,7 @@ public class ProjectResource implements Secured {
     @DELETE
     @Path("{projectId}")
     @Interceptors(ProjectInterceptor.class)
-    public Response removeProject(@PathParam("projectId") @ProjectExists Long projectId) {
+    public Response removeProject(@PathParam("projectId") @ProjectExists @ProjectId Long projectId) {
         projectService.removeProject(projectId);
 
         return Response.ok().build();

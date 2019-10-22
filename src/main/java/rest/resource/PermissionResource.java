@@ -5,10 +5,12 @@ import repository.entities.Permission;
 import rest.dto.permission.PermissionDTO;
 import rest.resource.annotations.HideForPermission;
 import rest.resource.interceptors.MethodInterceptor;
+import security.ApplicationUser;
 import security.domain.Role;
 import service.PermissionService;
 
 import javax.annotation.security.PermitAll;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.Consumes;
@@ -23,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +37,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("permission")
 @Consumes(APPLICATION_JSON)
 @Produces(APPLICATION_JSON)
+@RequestScoped
 public class PermissionResource implements Secured {
 
     @Inject
@@ -96,12 +100,31 @@ public class PermissionResource implements Secured {
         return Response.ok(PermissionLevel.values()).build();
     }
 
+    @GET
+    @Path("check/{methodName}")
+    @HideForPermission
+    public Response checkPermission(@PathParam("methodName") String methodName) {
+        List<PermissionLevel> permissionLevels = new ArrayList<>();
+        ApplicationUser applicationUser = (ApplicationUser) securityContext.getUserPrincipal();
+
+        applicationUser.getRoles().forEach(role -> {
+            Permission permission = permissionService.findPermissionByRoleAndMethod(role, methodName);
+
+            if (permission != null) {
+                permissionLevels.add(permission.getPermissionLevel());
+            }
+        });
+
+        return Response.ok(permissionLevels).build();
+    }
+
     @Override
     @HideForPermission
     public SecurityContext getSecurityContext() {
         return securityContext;
     }
 
+    @HideForPermission
     private Set<String> getMethodNames(Class clazz) {
         return Arrays.stream(clazz.getDeclaredMethods())
                 .filter(this::isVisibleForPermission)
@@ -110,6 +133,7 @@ public class PermissionResource implements Secured {
                 .collect(Collectors.toSet());
     }
 
+    @HideForPermission
     private boolean isVisibleForPermission(Method method) {
         return Arrays.stream(method.getDeclaredAnnotations())
                 .noneMatch(annotation -> annotation.annotationType().equals(HideForPermission.class) || annotation.annotationType().equals(PermitAll.class));

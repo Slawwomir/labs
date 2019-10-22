@@ -7,6 +7,8 @@ import {Project} from "../../../models/project";
 import {ValidationUtils} from "../../../shared/utils/validationUtils";
 import {AuthService} from "../../../services/auth.service";
 import {Role} from "../../../models/role";
+import {PermissionsService} from "../../../services/permissions.service";
+import {PermissionLevel} from "../../../models/permissionLevel";
 
 @Component({
   selector: 'app-project-detail',
@@ -20,11 +22,15 @@ export class ProjectDetailComponent implements OnInit {
   editMode: boolean;
   errors: String[];
   RoleEnum = Role;
+  updateProjectPermissions: PermissionLevel[];
+  getIssuesPermissions: PermissionLevel[];
+  addIssuePermissions: PermissionLevel[];
 
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
     private authService: AuthService,
+    private permissionsService: PermissionsService,
     private location: Location
   ) {
   }
@@ -34,7 +40,22 @@ export class ProjectDetailComponent implements OnInit {
     this.errors = [];
     this.route.params.subscribe(queryParams => {
       this.getProject();
-    })
+    });
+
+    this.permissionsService.getUserPermissionsForAction("updateProject")
+      .subscribe(permissions =>
+        this.updateProjectPermissions = permissions
+      );
+
+    this.permissionsService.getUserPermissionsForAction("getIssue")
+      .subscribe(permissions =>
+        this.getIssuesPermissions = permissions
+      );
+
+    this.permissionsService.getUserPermissionsForAction("addIssue")
+      .subscribe(permissions =>
+        this.addIssuePermissions = permissions
+      );
   }
 
   getProject(): void {
@@ -61,5 +82,16 @@ export class ProjectDetailComponent implements OnInit {
     this.editMode = this.authService.isUserInRole(Role.Admin);
     this.errors = [];
     this.projectEdit = Object.assign({}, this.project);
+  }
+
+  canUpdateProject() {
+    return ValidationUtils.validatePermissions(
+      this.updateProjectPermissions, this.project.projectOwnerId, this.authService.getUserId()
+    )
+  }
+
+  canSeeOrAddIssues() {
+    return ValidationUtils.validatePermissions(this.getIssuesPermissions)
+      || ValidationUtils.validatePermissions(this.addIssuePermissions);
   }
 }

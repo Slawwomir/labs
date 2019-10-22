@@ -6,6 +6,8 @@ import {IssueService} from "../../../../services/issue.service";
 import {Location} from "@angular/common";
 import {ValidationUtils} from "../../../../shared/utils/validationUtils";
 import {AuthService} from "../../../../services/auth.service";
+import {PermissionsService} from "../../../../services/permissions.service";
+import {PermissionLevel} from "../../../../models/permissionLevel";
 
 @Component({
   selector: 'app-issue-list',
@@ -22,6 +24,9 @@ export class IssueListComponent implements OnInit, OnChanges {
   statuses: string[];
   errorMessages: String[];
   filterByStatus: String = IssueListComponent.DEFAULT_SELECT;
+  addIssuePermissions: PermissionLevel[];
+  editIssuePermissions: PermissionLevel[];
+  removeIssuePermissions: PermissionLevel[];
 
   isFullCreate: boolean;
   newIssue: Issue;
@@ -29,6 +34,7 @@ export class IssueListComponent implements OnInit, OnChanges {
   constructor(
     private projectService: ProjectService,
     private issueService: IssueService,
+    private permissionsService: PermissionsService,
     private authService: AuthService,
     private location: Location
   ) {
@@ -38,6 +44,16 @@ export class IssueListComponent implements OnInit, OnChanges {
     this.errorMessages = [];
     this.getIssues();
     this.getStatuses();
+
+    this.permissionsService.getUserPermissionsForAction("addIssue")
+      .subscribe(permissions =>
+        this.addIssuePermissions = permissions
+      );
+
+    this.permissionsService.getUserPermissionsForAction("removeIssue")
+      .subscribe(permissions =>
+        this.removeIssuePermissions = permissions
+      );
   }
 
   add(issueName: string): void {
@@ -96,5 +112,13 @@ export class IssueListComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     this.projectId = changes.projectId.currentValue;
     this.getIssues();
+  }
+
+  canRemoveIssue(reporterId: number) {
+    return ValidationUtils.validatePermissions(this.removeIssuePermissions, reporterId, this.authService.getUserId());
+  }
+
+  canAddIssue() {
+    return ValidationUtils.validatePermissions(this.addIssuePermissions);
   }
 }

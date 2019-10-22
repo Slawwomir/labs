@@ -1,4 +1,5 @@
 import {HttpErrorResponse} from "@angular/common/http";
+import {PermissionLevel} from "../../models/permissionLevel";
 
 export class ValidationUtils {
   static mapErrors(error): String[] {
@@ -12,5 +13,24 @@ export class ValidationUtils {
       }
       return errorMessages;
     }
+  }
+
+  static validatePermissions(permissions: PermissionLevel[], ownerId: number = undefined, currentUserId: number = undefined) {
+    if (!permissions) {
+      return false;
+    }
+
+    if (permissions.indexOf(PermissionLevel.GRANTED) != -1) {
+      return true;
+    }
+
+    if (permissions.indexOf(PermissionLevel.IF_OWNER) != -1) {
+      if (!ownerId) {
+        return true;
+      }
+      return ownerId == currentUserId;
+    }
+
+    return false;
   }
 }

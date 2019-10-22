@@ -3,6 +3,8 @@ import {HttpClient} from "@angular/common/http";
 import {Role} from "../models/role";
 import {Observable} from "rxjs";
 import {Permission} from "../models/permission";
+import {PermissionLevel} from "../models/permissionLevel";
+import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -34,5 +36,14 @@ export class PermissionsService {
 
   public removePermission(id: number) {
     return this.httpClient.delete(`/rest/permission/${id}`);
+  }
+
+  public getUserPermissionsForAction(action: string): Observable<PermissionLevel[]> {
+    return this.httpClient.get<string[]>(`/rest/permission/check/${action}`)
+      .pipe(
+        map(response => response.map(permission =>
+          PermissionLevel[permission]
+        ))
+      );
   }
 }

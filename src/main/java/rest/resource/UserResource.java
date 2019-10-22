@@ -67,7 +67,7 @@ public class UserResource implements Secured {
     @Path("{userId}")
     @Interceptors(UserInterceptor.class)
     public Response getUser(@Context UriInfo uriInfo,
-                            @PathParam("userId") @UserExists Long userId) {
+                            @PathParam("userId") @UserExists @UserId Long userId) {
         User user = userService.findUser(userId);
         UserDTO userDTO = new UserDTO(user);
         linksUtils.setLinksForUser(uriInfo, userDTO);
