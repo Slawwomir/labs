@@ -5,6 +5,7 @@ import domain.issue.IssueType;
 import lombok.Data;
 import repository.Possessable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -18,16 +19,23 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Date;
 
 @Entity
 @Data
 @NamedQueries({
-        @NamedQuery(name = "Issue.findAll", query = "SELECT i FROM Issue i"),
-        @NamedQuery(name = "Issue.findByProjectId", query = "SELECT i FROM Issue i WHERE i.project.id = ?1"),
-        @NamedQuery(name = "Issue.findByReporterId", query = "SELECT i FROM Issue i WHERE i.reporter.id = ?1"),
-        @NamedQuery(name = "Issue.findByProjectIdAndStatus", query = "SELECT i FROM Issue i where i.project.id = ?1 and i.status = ?2"),
-        @NamedQuery(name = "Issue.remove", query = "DELETE FROM Issue i where i.id = ?1"),
-        @NamedQuery(name = "Issue.findByIssueIdAndProjectId", query = "SELECT i FROM Issue i WHERE i.id = ?1 and i.project.id = ?2")
+        @NamedQuery(name = "Issue.findAll",
+                query = "SELECT i FROM Issue i ORDER BY i.updatedDate desc"),
+        @NamedQuery(name = "Issue.findByProjectId",
+                query = "SELECT i FROM Issue i WHERE i.project.id = ?1 ORDER BY i.updatedDate desc"),
+        @NamedQuery(name = "Issue.findByReporterId",
+                query = "SELECT i FROM Issue i WHERE i.reporter.id = ?1 ORDER BY i.updatedDate desc"),
+        @NamedQuery(name = "Issue.findByProjectIdAndStatus",
+                query = "SELECT i FROM Issue i where i.project.id = ?1 and i.status = ?2 ORDER BY i.updatedDate desc"),
+        @NamedQuery(name = "Issue.remove",
+                query = "DELETE FROM Issue i where i.id = ?1"),
+        @NamedQuery(name = "Issue.findByIssueIdAndProjectId",
+                query = "SELECT i FROM Issue i WHERE i.id = ?1 and i.project.id = ?2 ORDER BY i.updatedDate desc")
 })
 public class Issue implements Serializable, Possessable {
 
@@ -57,6 +65,9 @@ public class Issue implements Serializable, Possessable {
 
     @Enumerated(EnumType.STRING)
     private IssueStatus status;
+
+    @Column(name = "updated_date")
+    private Date updatedDate;
 
     private String description;
 

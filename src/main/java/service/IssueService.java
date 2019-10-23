@@ -13,6 +13,8 @@ import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Stateless
@@ -63,6 +65,8 @@ public class IssueService {
     }
 
     public synchronized Issue saveIssue(Issue issue) {
+        issue.setUpdatedDate(Date.from(ZonedDateTime.now().toInstant()));
+
         if (issue.getId() != null) {
             entityManager.merge(issue);
         } else {

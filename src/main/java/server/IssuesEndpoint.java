@@ -6,13 +6,9 @@ import domain.issue.IssueChangedEvent;
 import repository.entities.Issue;
 import service.PermissionService;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.CDI;
+import javax.inject.Inject;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -33,6 +29,9 @@ public class IssuesEndpoint implements Serializable {
     private Session session;
     private Long userId;
     private Long projectId;
+
+    @Inject
+    private PermissionService permissionService;
 
     @OnOpen
     public void onOpen(Session session) {
@@ -56,13 +55,20 @@ public class IssuesEndpoint implements Serializable {
 
     @OnError
     public void onError(Session session, Throwable throwable) {
+    }
 
+    private boolean isIssueInProject(Issue issue, Long projectId) {
+        return issue.getProject().getId().equals(projectId);
+    }
+
+    private boolean hasPermissionToIssue(Issue issue, Long userId) {
+        return permissionService.hasUserPermissionToIssue(userId, issue.getId(), "getIssue");
     }
 
     public static void onIssueChanged(@Observes IssueChangedEvent event) {
         clients.parallelStream()
-                .filter(client -> hasPermission(event.getIssue(), client.userId))
-                .filter(client -> isIssueInProject(event.getIssue(), client.projectId))
+                .filter(client -> client.hasPermissionToIssue(event.getIssue(), client.userId))
+                .filter(client -> client.isIssueInProject(event.getIssue(), client.projectId))
                 .forEach(client -> {
                     try {
                         client.session.getBasicRemote().sendText("{\"refresh\": \"true\"}"); // ping
@@ -70,21 +76,5 @@ public class IssuesEndpoint implements Serializable {
                         throw new RuntimeException("Cannot send text to remote client", e);
                     }
                 });
-    }
-
-    private static boolean isIssueInProject(Issue issue, Long projectId) {
-        return issue.getProject().getId().equals(projectId);
-    }
-
-    private static boolean hasPermission(Issue issue, Long userId) {
-        PermissionService permissionService = getPermissionService();
-        return permissionService.hasUserPermissionToIssue(userId, issue.getId(), "getIssue");
-    }
-
-    private static PermissionService getPermissionService() {
-        BeanManager beanManager = CDI.current().getBeanManager();
-        Bean<PermissionService> permissionServiceBean = (Bean<PermissionService>) beanManager.getBeans(PermissionService.class).iterator().next();
-        CreationalContext<PermissionService> creationalContext = beanManager.createCreationalContext(permissionServiceBean);
-        return (PermissionService) beanManager.getReference(permissionServiceBean, PermissionService.class, creationalContext);
     }
 }
