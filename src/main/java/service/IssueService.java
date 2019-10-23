@@ -1,5 +1,6 @@
 package service;
 
+import domain.issue.IssueChangedEvent;
 import repository.entities.Issue;
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
@@ -7,6 +8,8 @@ import repository.entities.Project;
 import rest.dto.issue.IssueDTO;
 
 import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -20,6 +23,10 @@ public class IssueService {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    @Any
+    private Event<IssueChangedEvent> issueChangedEvent;
 
     public List<Issue> findAllIssues() {
         return entityManager.createNamedQuery("Issue.findAll", Issue.class).getResultList();
@@ -61,6 +68,8 @@ public class IssueService {
         } else {
             entityManager.persist(issue);
         }
+
+        issueChangedEvent.fire(new IssueChangedEvent(issue));
 
         return issue;
     }
