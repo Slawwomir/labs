@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges, OnDestroy} from '@angular/core';
 import {Project} from "../../../../models/project";
 import {ProjectService} from "../../../../services/project.service";
 import {Issue} from "../../../../models/issue";
@@ -8,13 +8,15 @@ import {ValidationUtils} from "../../../../shared/utils/validationUtils";
 import {AuthService} from "../../../../services/auth.service";
 import {PermissionsService} from "../../../../services/permissions.service";
 import {PermissionLevel} from "../../../../models/permissionLevel";
+import {WebsocketService} from "../../../../services/websocket.service";
+import {WebSocketSubject} from "rxjs/webSocket";
 
 @Component({
   selector: 'app-issue-list',
   templateUrl: './issue-list.component.html',
   styleUrls: ['./issue-list.component.css']
 })
-export class IssueListComponent implements OnInit, OnChanges {
+export class IssueListComponent implements OnInit, OnChanges, OnDestroy {
 
   private static DEFAULT_SELECT = "All";
 
@@ -31,11 +33,14 @@ export class IssueListComponent implements OnInit, OnChanges {
   isFullCreate: boolean;
   newIssue: Issue;
 
+  subject;
+
   constructor(
     private projectService: ProjectService,
     private issueService: IssueService,
     private permissionsService: PermissionsService,
     private authService: AuthService,
+    private webSocket: WebsocketService,
     private location: Location
   ) {
   }
@@ -54,6 +59,17 @@ export class IssueListComponent implements OnInit, OnChanges {
       .subscribe(permissions =>
         this.removeIssuePermissions = permissions
       );
+
+    this.watchIssues();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.projectId = changes.projectId.currentValue;
+    this.getIssues();
+  }
+
+  ngOnDestroy(): void {
+    this.webSocket.disconnect(this.subject);
   }
 
   add(issueName: string): void {
@@ -93,6 +109,14 @@ export class IssueListComponent implements OnInit, OnChanges {
     this.location.back();
   }
 
+  canRemoveIssue(reporterId: number) {
+    return ValidationUtils.validatePermissions(this.removeIssuePermissions, reporterId, this.authService.getUserId());
+  }
+
+  canAddIssue() {
+    return ValidationUtils.validatePermissions(this.addIssuePermissions);
+  }
+
   private getIssues(): void {
     let filters: {};
 
@@ -109,16 +133,13 @@ export class IssueListComponent implements OnInit, OnChanges {
       .subscribe(statuses => this.statuses = statuses);
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    this.projectId = changes.projectId.currentValue;
-    this.getIssues();
-  }
-
-  canRemoveIssue(reporterId: number) {
-    return ValidationUtils.validatePermissions(this.removeIssuePermissions, reporterId, this.authService.getUserId());
-  }
-
-  canAddIssue() {
-    return ValidationUtils.validatePermissions(this.addIssuePermissions);
+  private watchIssues() {
+    this.subject = this.webSocket.connect(this.projectId);
+    this.subject.onMessage = (message => {
+      this.getIssues();
+    });
+    this.subject.subscribe(m => {
+      this.getIssues();
+    })
   }
 }

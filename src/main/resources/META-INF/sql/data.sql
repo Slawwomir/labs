@@ -52,3 +52,15 @@ VALUES ('ADMIN', 'getPermissions', 'GRANTED');
 
 INSERT INTO PERMISSION(role_name, method_name, permission_level)
 VALUES ('ADMIN', 'removePermission', 'GRANTED');
+
+INSERT INTO PERMISSION(role_name, method_name, permission_level)
+VALUES ('ADMIN', 'getProject', 'GRANTED');
+
+INSERT INTO PERMISSION(role_name, method_name, permission_level)
+VALUES ('ADMIN', 'getIssue', 'GRANTED');
+
+INSERT INTO PERMISSION(role_name, method_name, permission_level)
+VALUES ('ADMIN', 'updateIssue', 'GRANTED');
+
+INSERT INTO PERMISSION(role_name, method_name, permission_level)
+VALUES ('ADMIN', 'updateProject', 'GRANTED');

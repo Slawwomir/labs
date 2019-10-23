@@ -19,7 +19,6 @@ export class ProjectsComponent implements OnInit {
   errors: String[];
   RoleEnum = Role;
   private createProjectPermissions: PermissionLevel[];
-  private updateProjectPermissions: PermissionLevel[];
   private removeProjectPermissions: PermissionLevel[];
 
   constructor(private projectService: ProjectService,
@@ -34,11 +33,6 @@ export class ProjectsComponent implements OnInit {
     this.permissionsService.getUserPermissionsForAction("addProject")
       .subscribe(permissions =>
         this.createProjectPermissions = permissions
-      );
-
-    this.permissionsService.getUserPermissionsForAction("updateProject")
-      .subscribe(permissions =>
-        this.updateProjectPermissions = permissions
       );
 
     this.permissionsService.getUserPermissionsForAction("removeProject")
