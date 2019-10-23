@@ -64,3 +64,6 @@ VALUES ('ADMIN', 'updateIssue', 'GRANTED');
 
 INSERT INTO PERMISSION(role_name, method_name, permission_level)
 VALUES ('ADMIN', 'updateProject', 'GRANTED');
+
+INSERT INTO PERMISSION(role_name, method_name, permission_level)
+VALUES ('ADMIN', 'addIssue', 'GRANTED');

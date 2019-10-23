@@ -41,20 +41,20 @@ public class IssuesEndpoint implements Serializable {
 
     @OnMessage
     public void onMessage(Session session, String message) {
-        message = message.substring(1, message.length() - 1);
-        message = message.replace("\\", "");
+        message = formatStringForJson(message);
         JsonObject jsonObject = new JsonParser().parse(message).getAsJsonObject();
         this.userId = jsonObject.get("userId").getAsLong();
         this.projectId = jsonObject.get("projectId").getAsLong();
     }
 
-    @OnClose
-    public void onClose(Session session) {
+    @OnError
+    public void onError(Session session, Throwable throwable) {
         clients.remove(this);
     }
 
-    @OnError
-    public void onError(Session session, Throwable throwable) {
+    @OnClose
+    public void onClose(Session session) {
+        clients.remove(this);
     }
 
     private boolean isIssueInProject(Issue issue, Long projectId) {
@@ -65,16 +65,29 @@ public class IssuesEndpoint implements Serializable {
         return permissionService.hasUserPermissionToIssue(userId, issue.getId(), "getIssue");
     }
 
-    public static void onIssueChanged(@Observes IssueChangedEvent event) {
-        clients.parallelStream()
-                .filter(client -> client.hasPermissionToIssue(event.getIssue(), client.userId))
-                .filter(client -> client.isIssueInProject(event.getIssue(), client.projectId))
-                .forEach(client -> {
-                    try {
-                        client.session.getBasicRemote().sendText("{\"refresh\": \"true\"}"); // ping
-                    } catch (IOException e) {
-                        throw new RuntimeException("Cannot send text to remote client", e);
-                    }
-                });
+    public void onIssueChanged(IssueChangedEvent event) {
+        if (!hasPermissionToIssue(event.getIssue(), userId)) {
+            return;
+        }
+
+        if (!isIssueInProject(event.getIssue(), projectId)) {
+            return;
+        }
+
+        try {
+            session.getBasicRemote().sendText("{\"refresh\": \"true\"}"); // ping
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot send text to remote client", e);
+        }
+    }
+
+    private String formatStringForJson(String message) {
+        message = message.substring(1, message.length() - 1);
+        message = message.replace("\\", "");
+        return message;
+    }
+
+    public static void listenForIssueChanges(@Observes IssueChangedEvent event) {
+        clients.forEach(client -> client.onIssueChanged(event));
     }
 }
