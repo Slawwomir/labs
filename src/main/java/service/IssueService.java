@@ -1,6 +1,7 @@
 package service;
 
 import domain.issue.IssueChangedEvent;
+import domain.issue.IssueCriteria;
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
 import repository.entities.Issue;
@@ -13,6 +14,9 @@ import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
@@ -112,5 +116,43 @@ public class IssueService {
                 .setParameter(1, projectId)
                 .setParameter(2, status)
                 .getResultList();
+    }
+
+    public List<Issue> getFilteredIssues(IssueCriteria issueCriteria) {
+        CriteriaBuilder cr = entityManager.getCriteriaBuilder();
+        Root<Issue> root = cr.createQuery().from(Issue.class);
+        CriteriaQuery<Issue> issueCriteriaQuery = buildPredicate(issueCriteria, cr, root);
+
+        return entityManager.createQuery(issueCriteriaQuery).getResultList();
+    }
+
+    private CriteriaQuery<Issue> buildPredicate(IssueCriteria issueCriteria, CriteriaBuilder cr, Root<Issue> root) {
+        CriteriaQuery<Issue> select = cr.createQuery(Issue.class).select(root);
+
+        if (issueCriteria.getAssigneeId() != null) {
+            select = select.where(cr.equal(root.get("assignee").get("id"), issueCriteria.getAssigneeId()));
+        }
+
+        if (issueCriteria.getProjectId() != null) {
+            select = select.where(cr.equal(root.get("project").get("id"), issueCriteria.getProjectId()));
+        }
+
+        if (issueCriteria.getName() != null) {
+            select = select.where(cr.like(root.get("name"), issueCriteria.getName()));
+        }
+
+        if (issueCriteria.getIssueStatus() != null) {
+            select = select.where(cr.equal(root.get("issue_status"), issueCriteria.getIssueStatus()));
+        }
+
+        if (issueCriteria.getIssueType() != null) {
+            select = select.where(cr.equal(root.get("issue_type"), issueCriteria.getIssueType()));
+        }
+
+        if (issueCriteria.getReporterId() != null) {
+            select = select.where(cr.equal(root.get("reporter").get("id"), issueCriteria.getReporterId()));
+        }
+
+        return select.orderBy(cr.desc(root.get("changed_date")));
     }
 }
