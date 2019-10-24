@@ -71,13 +71,10 @@ public class PermissionService {
         List<Role> roles = userService.findUser(userId).getUserCredentials().getRoles();
 
         return roles.stream().anyMatch(role -> {
-            Permission permissionForMethod = findPermissionByRoleAndMethod(role.getRoleName(), methodName);
+            List<Permission> permissionsForMethod = findPermissionByRoleAndMethod(role.getRoleName(), methodName);
 
-            if (permissionForMethod != null) {
-                return permissionForMethod.getPermissionLevel() == PermissionLevel.GRANTED;
-            }
-
-            return false;
+            return permissionsForMethod.stream()
+                    .anyMatch(permission -> permission.getPermissionLevel() == PermissionLevel.GRANTED);
         });
     }
 
@@ -87,13 +84,10 @@ public class PermissionService {
         }
 
         return roles.stream().anyMatch(role -> {
-            Permission permission = findPermissionByRoleAndMethod(role.getRoleName(), methodName);
+            List<Permission> permissions = findPermissionByRoleAndMethod(role.getRoleName(), methodName);
 
-            if (permission == null) {
-                return false;
-            }
-
-            return checkPermission(userId, entity, permission);
+            return permissions.stream()
+                    .anyMatch(permission -> checkPermission(userId, entity, permission));
         });
     }
 
@@ -108,16 +102,10 @@ public class PermissionService {
         }
     }
 
-    public Permission findPermissionByRoleAndMethod(String roleName, String methodName) {
-        List<Permission> permissions = entityManager.createNamedQuery("Permission.findByRoleAndMethod", Permission.class)
+    public List<Permission> findPermissionByRoleAndMethod(String roleName, String methodName) {
+        return entityManager.createNamedQuery("Permission.findByRoleAndMethod", Permission.class)
                 .setParameter(1, roleName)
                 .setParameter(2, methodName)
                 .getResultList();
-
-        if (permissions.isEmpty()) {
-            return null;
-        }
-
-        return permissions.get(0);
     }
 }

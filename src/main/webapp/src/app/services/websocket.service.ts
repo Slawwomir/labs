@@ -7,8 +7,6 @@ import {AuthService} from "./auth.service";
 })
 export class WebsocketService {
 
-  private issuesWebSocket: WebSocketSubject<String> = webSocket('ws://localhost:8080/lab2-1.0-SNAPSHOT/issues');
-
   constructor(
     private authService: AuthService
   ) {

@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit, SimpleChanges, OnDestroy} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {Project} from "../../../../models/project";
 import {ProjectService} from "../../../../services/project.service";
 import {Issue} from "../../../../models/issue";
@@ -9,7 +9,8 @@ import {AuthService} from "../../../../services/auth.service";
 import {PermissionsService} from "../../../../services/permissions.service";
 import {PermissionLevel} from "../../../../models/permissionLevel";
 import {WebsocketService} from "../../../../services/websocket.service";
-import {WebSocketSubject} from "rxjs/webSocket";
+import {UserService} from "../../../../services/user.service";
+import {User} from "../../../../models/user";
 
 @Component({
   selector: 'app-issue-list',
@@ -29,6 +30,7 @@ export class IssueListComponent implements OnInit, OnChanges, OnDestroy {
   addIssuePermissions: PermissionLevel[];
   editIssuePermissions: PermissionLevel[];
   removeIssuePermissions: PermissionLevel[];
+  users: Map<number, User> = new Map<number, User>();
 
   isFullCreate: boolean;
   newIssue: Issue;
@@ -38,6 +40,7 @@ export class IssueListComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private projectService: ProjectService,
     private issueService: IssueService,
+    private userService: UserService,
     private permissionsService: PermissionsService,
     private authService: AuthService,
     private webSocket: WebsocketService,
@@ -125,7 +128,20 @@ export class IssueListComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.projectService.getIssues({id: this.projectId} as Project, filters)
-      .subscribe(issues => this.issues = issues);
+      .subscribe(issues => {
+        this.issues = issues;
+        this.fetchUsers();
+      });
+  }
+
+  private fetchUsers() {
+    this.permissionsService.getUserPermissionsForAction("getUser")
+      .subscribe(response => {
+          if (ValidationUtils.validatePermissions(response)) {
+            this.issues.forEach(issue => this.getReporter(issue.reporterId))
+          }
+        }
+      );
   }
 
   private getStatuses(): void {
@@ -141,5 +157,12 @@ export class IssueListComponent implements OnInit, OnChanges, OnDestroy {
     this.subject.subscribe(m => {
       this.getIssues();
     })
+  }
+
+  private getReporter(reporterId: number) {
+    this.userService.getUser(reporterId)
+      .subscribe(user =>
+        this.users.set(reporterId, user)
+      )
   }
 }

@@ -1,9 +1,9 @@
 package service;
 
 import domain.issue.IssueChangedEvent;
-import repository.entities.Issue;
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
+import repository.entities.Issue;
 import repository.entities.Project;
 import rest.dto.issue.IssueDTO;
 
@@ -79,7 +79,10 @@ public class IssueService {
     }
 
     public void removeIssue(Long issueId) {
-        entityManager.remove(findIssue(issueId));
+        Issue issue = findIssue(issueId);
+        entityManager.remove(issue);
+
+        issueChangedEvent.fire(new IssueChangedEvent(null));
     }
 
     public List<IssueStatus> getIssueStatuses() {

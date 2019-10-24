@@ -11,6 +11,7 @@ import {Router} from "@angular/router";
 export class LoginComponent {
 
   form: FormGroup;
+  error: string;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -31,6 +32,8 @@ export class LoginComponent {
         .subscribe(() => {
           console.log("User is logged in");
           this.router.navigateByUrl("/dashboard")
+        }, error => {
+          this.error = "Credentials are invalid";
         })
     }
   }

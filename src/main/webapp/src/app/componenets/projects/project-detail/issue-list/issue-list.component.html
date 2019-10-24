@@ -9,7 +9,8 @@
 <ul class="issues">
   <li *ngFor="let issue of issues">
     <a routerLink="/issue/{{issue.id}}">
-      <span class="badge">{{issue.id}}</span> {{issue.name}}
+      <span class="badge">{{issue.id}}</span> {{issue.name}}<br/>
+      {{ this.users.has(issue.reporterId) ? "Reporter:" + this.users.get(issue.reporterId).username : ""}}
     </a>
     <button *ngIf="canRemoveIssue(issue.reporterId)" (click)="remove(issue)">Remove</button>
   </li>
