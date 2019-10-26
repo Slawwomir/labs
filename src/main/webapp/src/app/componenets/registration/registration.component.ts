@@ -29,11 +29,16 @@ export class RegistrationComponent implements OnInit {
 
   private register() {
     let user = {username: this.form.value.username, password: this.form.value.password};
-    this.authService.registerUser(user)
-      .subscribe(resp => {
-        this.router.navigateByUrl("/login");
-      }, error => {
-        this.error = error.error;
-      })
+
+    if (this.form.value.username && this.form.value.password) {
+      this.authService.registerUser(user)
+        .subscribe(resp => {
+          this.router.navigateByUrl("/login");
+        }, error => {
+          this.error = error.error;
+        })
+    } else {
+      this.error = "All field must be filled up";
+    }
   }
 }
