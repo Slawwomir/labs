@@ -1,16 +1,19 @@
 package rest.resource;
 
-import repository.entities.Issue;
-import rest.dto.issue.IssueDTO;
+import domain.issue.IssueCriteria;
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
+import repository.entities.Issue;
+import rest.dto.issue.IssueDTO;
 import rest.dto.issue.IssuesDTO;
 import rest.resource.annotations.HideForPermission;
+import rest.resource.annotations.IssueId;
 import rest.resource.interceptors.IssueInterceptor;
 import rest.resource.interceptors.MethodInterceptor;
 import rest.resource.utils.LinksUtils;
 import rest.validation.annotations.IssueExists;
-import rest.resource.annotations.IssueId;
+import rest.validation.annotations.ProjectExists;
+import rest.validation.annotations.UserExists;
 import security.ApplicationUser;
 import service.IssueService;
 import service.PermissionService;
@@ -20,22 +23,8 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Link;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,18 +49,25 @@ public class IssueResource implements Secured {
     @GET
     @HideForPermission
     public Response getIssues(@Context UriInfo uriInfo,
-                              @QueryParam("start") int start,
-                              @QueryParam("size") @DefaultValue("2") int size) {
-        ApplicationUser user = (ApplicationUser) securityContext.getUserPrincipal();
+                              @QueryParam("projectId") @ProjectExists Long projectId,
+                              @QueryParam("status") IssueStatus issueStatus,
+                              @QueryParam("type") IssueType issueType,
+                              @QueryParam("assigneeId") @UserExists Long assigneeId,
+                              @QueryParam("reporterId") @UserExists Long reporterId) {
+        IssueCriteria issueCriteria = IssueCriteria.builder()
+                .projectId(projectId)
+                .issueStatus(issueStatus)
+                .assigneeId(assigneeId)
+                .reporterId(reporterId)
+                .issueType(issueType)
+                .build();
 
-        List<IssueDTO> issues = issueService.findIssues(start, size).stream()
+        ApplicationUser user = (ApplicationUser) securityContext.getUserPrincipal();
+        List<IssueDTO> issues = issueService.findIssues(issueCriteria).stream()
                 .filter(issue -> permissionService.hasUserPermissionToIssue(user.getId(), issue.getId(), "getIssue"))
                 .map(IssueDTO::new)
                 .collect(Collectors.toList());
-
-        List<Link> links = linksUtils.getLinksForPagination(uriInfo, start, size, issueService.getIssuesCount());
-        issues.forEach(issue -> linksUtils.setLinksForIssue(uriInfo, issue));
-        IssuesDTO issuesEntity = new IssuesDTO(issues, links);
+        IssuesDTO issuesEntity = new IssuesDTO(issues, null);
 
         return Response.ok(issuesEntity).build();
     }

@@ -1,6 +1,8 @@
 package rest.resource;
 
+import domain.issue.IssueCriteria;
 import domain.issue.IssueStatus;
+import domain.issue.IssueType;
 import repository.entities.Issue;
 import repository.entities.Project;
 import rest.dto.issue.IssueDTO;
@@ -15,6 +17,7 @@ import rest.resource.interceptors.MethodInterceptor;
 import rest.resource.interceptors.ProjectInterceptor;
 import rest.resource.utils.LinksUtils;
 import rest.validation.annotations.ProjectExists;
+import rest.validation.annotations.UserExists;
 import security.ApplicationUser;
 import service.IssueService;
 import service.PermissionService;
@@ -24,16 +27,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -131,24 +125,33 @@ public class ProjectResource implements Secured {
     public Response getProjectIssues(
             @Context UriInfo uriInfo,
             @PathParam("projectId") @ProjectExists @ProjectId Long projectId,
-            @QueryParam("status") IssueStatus status) {
-        List<Issue> results;
-        if (status != null) {
-            results = issueService.findIssuesByProjectIdAndStatus(projectId, status);
-        } else {
-            results = issueService.findIssuesByProjectId(projectId);
-        }
+            @QueryParam("status") IssueStatus issueStatus,
+            @QueryParam("type") IssueType issueType,
+            @QueryParam("assigneeId") @UserExists Long assigneeId,
+            @QueryParam("reporterId") @UserExists Long reporterId) {
 
+        IssueCriteria issueCriteria = IssueCriteria.builder()
+                .projectId(projectId)
+                .issueStatus(issueStatus)
+                .assigneeId(assigneeId)
+                .reporterId(reporterId)
+                .build();
+
+        List<Issue> results = issueService.findIssues(issueCriteria);
+        List<IssueDTO> issues = checkPermission(results);
+        issues.forEach(issue -> linksUtils.setLinksForIssue(uriInfo, issue));
+        List<Link> link = List.of(linksUtils.getSelfLink(uriInfo.getRequestUri(), "self", "GET"));
+
+        return Response.ok(new IssuesDTO(issues, link)).build();
+    }
+
+    private List<IssueDTO> checkPermission(List<Issue> results) {
         ApplicationUser user = (ApplicationUser) securityContext.getUserPrincipal();
 
-        List<IssueDTO> issues = results.stream()
+        return results.stream()
                 .filter(issue -> permissionService.hasUserPermissionToIssue(user.getId(), issue.getId(), "getIssue"))
                 .map(IssueDTO::new)
                 .collect(Collectors.toList());
-        issues.forEach(issue -> linksUtils.setLinksForIssue(uriInfo, issue));
-
-        List<Link> link = List.of(linksUtils.getSelfLink(uriInfo.getRequestUri(), "self", "GET"));
-        return Response.ok(new IssuesDTO(issues, link)).build();
     }
 
     @GET

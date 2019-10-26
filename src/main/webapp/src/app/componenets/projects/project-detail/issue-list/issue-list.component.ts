@@ -28,7 +28,6 @@ export class IssueListComponent implements OnInit, OnChanges, OnDestroy {
   errorMessages: String[];
   filterByStatus: String = IssueListComponent.DEFAULT_SELECT;
   addIssuePermissions: PermissionLevel[];
-  editIssuePermissions: PermissionLevel[];
   removeIssuePermissions: PermissionLevel[];
   users: Map<number, User> = new Map<number, User>();
 
@@ -127,7 +126,7 @@ export class IssueListComponent implements OnInit, OnChanges, OnDestroy {
       filters = {status: this.filterByStatus};
     }
 
-    this.projectService.getIssues({id: this.projectId} as Project, filters)
+    this.projectService.getIssuesForProject({id: this.projectId} as Project, filters)
       .subscribe(issues => {
         this.issues = issues;
         this.fetchUsers();

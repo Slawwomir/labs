@@ -19,6 +19,7 @@ import {AccountManagementComponent} from './componenets/account-management/accou
 import {RegistrationComponent} from './componenets/registration/registration.component';
 import {AdminPanelComponent} from './componenets/admin-panel/admin-panel.component';
 import {PermissionsComponent} from './componenets/admin-panel/permissions/permissions.component';
+import {IssueSearchComponent} from './componenets/issue-search/issue-search.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import {PermissionsComponent} from './componenets/admin-panel/permissions/permis
     AccountManagementComponent,
     RegistrationComponent,
     AdminPanelComponent,
-    PermissionsComponent
+    PermissionsComponent,
+    IssueSearchComponent
   ],
   imports: [
     BrowserModule,

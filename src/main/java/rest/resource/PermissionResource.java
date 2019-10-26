@@ -13,23 +13,12 @@ import javax.annotation.security.PermitAll;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -108,11 +97,11 @@ public class PermissionResource implements Secured {
         ApplicationUser applicationUser = (ApplicationUser) securityContext.getUserPrincipal();
 
         applicationUser.getRoles().forEach(role -> {
-            Permission permission = permissionService.findPermissionByRoleAndMethod(role, methodName);
+            List<Permission> permissions = permissionService.findPermissionByRoleAndMethod(role, methodName);
 
-            if (permission != null) {
+            permissions.forEach(permission -> {
                 permissionLevels.add(permission.getPermissionLevel());
-            }
+            });
         });
 
         return Response.ok(permissionLevels).build();

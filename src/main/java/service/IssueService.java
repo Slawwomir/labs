@@ -16,8 +16,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -118,41 +120,45 @@ public class IssueService {
                 .getResultList();
     }
 
-    public List<Issue> getFilteredIssues(IssueCriteria issueCriteria) {
-        CriteriaBuilder cr = entityManager.getCriteriaBuilder();
-        Root<Issue> root = cr.createQuery().from(Issue.class);
-        CriteriaQuery<Issue> issueCriteriaQuery = buildPredicate(issueCriteria, cr, root);
+    public List<Issue> findIssues(IssueCriteria issueCriteria) {
+        CriteriaQuery<Issue> issueCriteriaQuery = buildPredicate(issueCriteria);
 
         return entityManager.createQuery(issueCriteriaQuery).getResultList();
     }
 
-    private CriteriaQuery<Issue> buildPredicate(IssueCriteria issueCriteria, CriteriaBuilder cr, Root<Issue> root) {
-        CriteriaQuery<Issue> select = cr.createQuery(Issue.class).select(root);
+    private CriteriaQuery<Issue> buildPredicate(IssueCriteria issueCriteria) {
+        CriteriaBuilder cr = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Issue> query = cr.createQuery(Issue.class);
+        Root<Issue> root = query.from(Issue.class);
+        CriteriaQuery<Issue> select = query.select(root);
+
+        List<Predicate> predicates = new ArrayList<>();
 
         if (issueCriteria.getAssigneeId() != null) {
-            select = select.where(cr.equal(root.get("assignee").get("id"), issueCriteria.getAssigneeId()));
+            predicates.add(cr.equal(root.get("assignee").get("id"), issueCriteria.getAssigneeId()));
         }
 
         if (issueCriteria.getProjectId() != null) {
-            select = select.where(cr.equal(root.get("project").get("id"), issueCriteria.getProjectId()));
+            predicates.add(cr.equal(root.get("project").get("id"), issueCriteria.getProjectId()));
         }
 
         if (issueCriteria.getName() != null) {
-            select = select.where(cr.like(root.get("name"), issueCriteria.getName()));
+            predicates.add(cr.like(root.get("name"), issueCriteria.getName()));
         }
 
         if (issueCriteria.getIssueStatus() != null) {
-            select = select.where(cr.equal(root.get("issue_status"), issueCriteria.getIssueStatus()));
+            predicates.add(cr.equal(root.get("status"), issueCriteria.getIssueStatus()));
         }
 
         if (issueCriteria.getIssueType() != null) {
-            select = select.where(cr.equal(root.get("issue_type"), issueCriteria.getIssueType()));
+            predicates.add(cr.equal(root.get("type"), issueCriteria.getIssueType()));
         }
 
         if (issueCriteria.getReporterId() != null) {
-            select = select.where(cr.equal(root.get("reporter").get("id"), issueCriteria.getReporterId()));
+            predicates.add(cr.equal(root.get("reporter").get("id"), issueCriteria.getReporterId()));
         }
 
-        return select.orderBy(cr.desc(root.get("changed_date")));
+
+        return select.where(predicates.toArray(Predicate[]::new)).orderBy(cr.desc(root.get("updatedDate")));
     }
 }

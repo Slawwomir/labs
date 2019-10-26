@@ -1,0 +1,41 @@
+<br/>
+<div>
+  <label> Filter by status:
+    <select [(ngModel)]="statusFilter">
+      <option [ngValue]="null">All</option>
+      <option *ngFor="let status of statuses" [value]="status">{{status}}</option>
+    </select>
+  </label>
+  <label> Filter by type:
+    <select [(ngModel)]="typeFilter">
+      <option [ngValue]="null">All</option>
+      <option *ngFor="let type of types" [value]="type">{{type}}</option>
+    </select>
+  </label>
+  <label> Filter by assignee:
+    <select [(ngModel)]="assigneeFilter">
+      <option [ngValue]="null">All</option>
+      <option *ngFor="let user of users" [value]="user.id">{{user.username}}</option>
+    </select>
+  </label>
+  <label> Filter by reporter:
+    <select [(ngModel)]="reporterFilter">
+      <option [ngValue]="null">All</option>
+      <option *ngFor="let user of users" [value]="user.id">{{user.username}}</option>
+    </select>
+  </label>
+  <label> Filter by project:
+    <select [(ngModel)]="projectFilter">
+      <option [ngValue]="null">All</option>
+      <option *ngFor="let project of projects" [value]="project.id">{{project.name}}</option>
+    </select>
+  </label>
+</div>
+<button (click)="onSearchClick()">Search</button>
+<ul class="issues">
+  <li *ngFor="let issue of issues">
+    <a routerLink="/issue/{{issue.id}}">
+      <span class="badge">{{issue.id}}</span> {{issue.name}}
+    </a>
+  </li>
+</ul>
