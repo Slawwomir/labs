@@ -3,16 +3,7 @@ package repository.entities;
 import lombok.Data;
 import repository.Possessable;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
@@ -23,6 +14,12 @@ import java.util.List;
         @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
         @NamedQuery(name = "User.remove", query = "DELETE FROM User u where u.id = ?1"),
         @NamedQuery(name = "User.findUserByName", query = " SELECT u FROM User u where u.name = ?1")
+})
+@NamedEntityGraphs({
+        @NamedEntityGraph(
+                name = "User.Graphs.withProjects",
+                attributeNodes = {@NamedAttributeNode("projects")}
+        )
 })
 public class User implements Serializable, Possessable {
 

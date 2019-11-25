@@ -12,6 +12,7 @@ import javax.persistence.PersistenceContext;
 import java.sql.Date;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Stateless
@@ -21,18 +22,10 @@ public class UserService {
     private EntityManager entityManager;
 
     public List<User> findAllUsers() {
-        return entityManager.createNamedQuery("User.findAll", User.class).getResultList();
-    }
-
-    public List<User> findUsers(int start, int max) {
-        return entityManager.createNamedQuery("User.findAll", User.class)
-                .setFirstResult(start)
-                .setMaxResults(max)
+        return entityManager
+                .createNamedQuery("User.findAll", User.class)
+                .setHint("javax.persistence.loadgraph", entityManager.getEntityGraph("User.Graphs.withProjects"))
                 .getResultList();
-    }
-
-    public Long getUsersCount() {
-        return entityManager.createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult();
     }
 
     public User findUser(Long id) {
@@ -42,7 +35,7 @@ public class UserService {
         return entityManager.find(User.class, id);
     }
 
-    public synchronized User saveUser(User user) {
+    private User saveUser(User user) {
         if (user.getId() != null) {
             entityManager.merge(user);
         } else {
@@ -82,6 +75,7 @@ public class UserService {
 
     public UserCredentials findUserCredentials(Long userId) {
         return entityManager.createNamedQuery("UserCredentials.findByUserId", UserCredentials.class)
+                .setHint("javax.persistence.loadgraph", entityManager.getEntityGraph("UserCredentials.Graphs.withRoles"))
                 .setParameter(1, userId)
                 .getSingleResult();
     }
@@ -90,7 +84,7 @@ public class UserService {
         return entityManager.merge(userCredentials);
     }
 
-    public Role saveRole(Role role) {
+    private Role saveRole(Role role) {
         if (role.getId() == null) {
             entityManager.persist(role);
             return role;
@@ -122,7 +116,7 @@ public class UserService {
     public User createUser(security.model.UserCredentials userCredentials) {
         User user = new User();
         user.setName(userCredentials.getUsername());
-        user = saveUser(user);
+        saveUser(user);
 
         UserCredentials userCredentialsEntity = new UserCredentials();
         userCredentialsEntity.setPasswordHash(userCredentials.getPasswordHash());

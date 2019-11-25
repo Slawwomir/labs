@@ -2,7 +2,10 @@ package repository.entities;
 
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import repository.Possessable;
 
 import javax.persistence.*;
@@ -12,6 +15,8 @@ import java.util.Date;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @NamedQueries({
         @NamedQuery(name = "Issue.findAll",
                 query = "SELECT i FROM Issue i ORDER BY i.updatedDate desc"),
@@ -26,6 +31,7 @@ import java.util.Date;
         @NamedQuery(name = "Issue.findByIssueIdAndProjectId",
                 query = "SELECT i FROM Issue i WHERE i.id = ?1 and i.project.id = ?2 ORDER BY i.updatedDate desc")
 })
+@Builder
 public class Issue implements Serializable, Possessable {
 
     @Id

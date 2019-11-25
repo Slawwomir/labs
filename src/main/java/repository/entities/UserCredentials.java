@@ -13,6 +13,12 @@ import java.util.Set;
 @Entity
 @Table(name = "USER_CREDENTIALS")
 @NamedQuery(name = "UserCredentials.findByUserId", query = "SELECT uc FROM UserCredentials uc where uc.user.id = ?1")
+@NamedEntityGraphs({
+        @NamedEntityGraph(
+                name = "UserCredentials.Graphs.withRoles",
+                attributeNodes = {@NamedAttributeNode("roles")}
+        )
+})
 public class UserCredentials implements Serializable {
 
     @Id
