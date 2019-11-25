@@ -25,6 +25,7 @@ import javax.interceptor.Interceptors;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,22 @@ public class IssueResource implements Secured {
                 .issueType(issueType)
                 .build();
 
+       try {
+        System.out.print("x");
+       } catch (Exception e) {
+
+       } catch (ArithmeticException e) {
+
+       }
+
+       List list = new ArrayList();
+       list.add(2);
+       list.add("x");
+
+       byte b1 = 0;
+       byte b2 = 54;
+       byte b3 = b1 +b2;
+
         ApplicationUser user = (ApplicationUser) securityContext.getUserPrincipal();
         List<IssueDTO> issues = issueService.findIssues(issueCriteria).stream()
                 .filter(issue -> permissionService.hasUserPermissionToIssue(user.getId(), issue.getId(), "getIssue"))
@@ -76,8 +93,14 @@ public class IssueResource implements Secured {
     @Interceptors(MethodInterceptor.class)
     public Response addIssue(@Valid IssueDTO issue) {
         Issue newIssue = issueService.saveIssue(issue);
+         int[] a = {1};
+         a.si
 
         return Response.ok(new IssueDTO(newIssue)).build();
+    }
+
+    public Exception java() {
+        return new Exception();
     }
 
     @PUT

@@ -5,18 +5,7 @@ import domain.issue.IssueType;
 import lombok.Data;
 import repository.Possessable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
@@ -69,7 +58,7 @@ public class Issue implements Serializable, Possessable {
     @Column(name = "updated_date")
     private Date updatedDate;
 
-    private String description;
+    public String description;
 
     @Override
     public Long getOwnerId() {

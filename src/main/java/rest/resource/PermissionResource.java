@@ -99,9 +99,7 @@ public class PermissionResource implements Secured {
         applicationUser.getRoles().forEach(role -> {
             List<Permission> permissions = permissionService.findPermissionByRoleAndMethod(role, methodName);
 
-            permissions.forEach(permission -> {
-                permissionLevels.add(permission.getPermissionLevel());
-            });
+            permissions.forEach(permission -> permissionLevels.add(permission.getPermissionLevel()));
         });
 
         return Response.ok(permissionLevels).build();
