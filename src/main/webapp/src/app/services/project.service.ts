@@ -42,10 +42,18 @@ export class ProjectService {
     return this.httpClient.delete(`rest/projects/${id}`);
   }
 
-  getIssues(project: Project, filters): Observable<Issue[]> {
+  getIssuesForProject(project: Project, filters): Observable<Issue[]> {
     return this.httpClient.get(
       `rest/projects/${project.id}/issues`, {
         params: filters
       }).pipe(map(response => response["issues"]))
+  }
+
+  getIssues(filters): Observable<Issue[]> {
+    filters = Object.entries(filters).filter(([key, value]) => value).reduce<any>((httpParams, [key, value]) => httpParams.set(key, value), new HttpParams());
+    return this.httpClient.get(
+      'rest/issues', {
+        params: filters
+      }).pipe(map(response => response["issues"]));
   }
 }

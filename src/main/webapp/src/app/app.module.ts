@@ -14,8 +14,12 @@ import {CommonModule} from "@angular/common";
 import {IssueEditComponent} from './componenets/projects/project-detail/issue-list/issue-edit/issue-edit.component';
 import {LoginComponent} from './componenets/login/login.component';
 import {AuthInterceptor} from "./auth.interceptor";
-import {AdminPanelComponent} from './componenets/admin-panel/admin-panel.component';
+import {RolesComponent} from "./componenets/admin-panel/roles/roles.component";
 import {AccountManagementComponent} from './componenets/account-management/account-management.component';
+import {RegistrationComponent} from './componenets/registration/registration.component';
+import {AdminPanelComponent} from './componenets/admin-panel/admin-panel.component';
+import {PermissionsComponent} from './componenets/admin-panel/permissions/permissions.component';
+import {IssueSearchComponent} from './componenets/issue-search/issue-search.component';
 
 @NgModule({
   declarations: [
@@ -27,8 +31,12 @@ import {AccountManagementComponent} from './componenets/account-management/accou
     IssueViewComponent,
     IssueEditComponent,
     LoginComponent,
+    RolesComponent,
+    AccountManagementComponent,
+    RegistrationComponent,
     AdminPanelComponent,
-    AccountManagementComponent
+    PermissionsComponent,
+    IssueSearchComponent
   ],
   imports: [
     BrowserModule,

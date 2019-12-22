@@ -1,9 +1,15 @@
-<h1>{{title}}</h1>
-<nav *ngIf="authService.isLoggedIn()">
-  <a routerLink="/dashboard">Dashboard</a>
-  <a routerLink="/projects">Projects</a>
-  <a routerLink="/account">My account</a>
-  <a *ngIf="authService.isUserInRole(RoleEnum.Admin)" routerLink="/admin">Admin Panel</a>
-  <a (click)="authService.logout()">Logout</a>
-</nav>
-<router-outlet></router-outlet>
+<router-outlet>
+  <h1>{{title}}</h1>
+  <nav *ngIf="authService.isLoggedIn()">
+    <a routerLink="/dashboard">Dashboard</a>
+    <a routerLink="/projects">Projects</a>
+    <a routerLink="/account">My account</a>
+    <a routerLink="/search">Search</a>
+    <a *ngIf="authService.isUserInRole(RoleEnum.Admin)" routerLink="/admin">Admin Panel</a>
+    <a (click)="authService.logout()">Logout</a>
+  </nav>
+  <nav *ngIf="!authService.isLoggedIn()">
+    <a routerLink="/register">Create account</a>
+    <a routerLink="/login">Login</a>
+  </nav>
+</router-outlet>

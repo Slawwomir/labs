@@ -1,8 +1,3 @@
-<div *ngFor="let user of users">
-  <label>{{user.username}}
-    <select [(ngModel)]="user.roles" name="roles" multiple>
-      <option *ngFor="let role of roles" [ngValue]="role">{{role}}</option>
-    </select>
-    <button (click)="updateUser(user)">Update</button>
-  </label>
-</div>
+<h2>ADMIN PANEL</h2>
+<button routerLink="/admin/roles">Manage roles</button>
+<button routerLink="/admin/permissions">Manage permissions</button>

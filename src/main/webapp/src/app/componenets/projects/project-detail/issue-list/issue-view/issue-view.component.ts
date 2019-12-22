@@ -5,6 +5,10 @@ import {ActivatedRoute} from "@angular/router";
 import {Location} from "@angular/common";
 import {UserService} from "../../../../../services/user.service";
 import {User} from "../../../../../models/user";
+import {PermissionsService} from "../../../../../services/permissions.service";
+import {PermissionLevel} from "../../../../../models/permissionLevel";
+import {ValidationUtils} from "../../../../../shared/utils/validationUtils";
+import {AuthService} from "../../../../../services/auth.service";
 
 @Component({
   selector: 'app-issue-view',
@@ -17,17 +21,24 @@ export class IssueViewComponent implements OnInit {
   editMode: boolean;
   assignee: User;
   reporter: User;
+  editIssuePermissions: PermissionLevel[];
 
   constructor(
     private location: Location,
     private issueService: IssueService,
     private userService: UserService,
+    private permissionsService: PermissionsService,
+    private authService: AuthService,
     private route: ActivatedRoute
   ) {
   }
 
   ngOnInit() {
     this.getIssue();
+    this.permissionsService.getUserPermissionsForAction("updateIssue")
+      .subscribe(permissions =>
+        this.editIssuePermissions = permissions
+      );
   }
 
   openEditMode(): void {
@@ -66,5 +77,9 @@ export class IssueViewComponent implements OnInit {
     this.editMode = false;
     this.issue = issue;
     this.getAssignee(issue);
+  }
+
+  canEditIssue(reportedId: number) {
+    return ValidationUtils.validatePermissions(this.editIssuePermissions, reportedId, this.authService.getUserId());
   }
 }

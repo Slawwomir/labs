@@ -68,4 +68,7 @@ export class AuthService {
     }
   }
 
+  public registerUser(user): Observable<User> {
+    return this.httpClient.post<User>('/rest/authentication/account', user);
+  }
 }

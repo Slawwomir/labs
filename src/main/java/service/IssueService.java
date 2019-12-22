@@ -1,15 +1,26 @@
 package service;
 
-import repository.entities.Issue;
+import domain.issue.IssueChangedEvent;
+import domain.issue.IssueCriteria;
 import domain.issue.IssueStatus;
 import domain.issue.IssueType;
+import repository.entities.Issue;
 import repository.entities.Project;
 import rest.dto.issue.IssueDTO;
 
 import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Stateless
@@ -20,6 +31,10 @@ public class IssueService {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    @Any
+    private Event<IssueChangedEvent> issueChangedEvent;
 
     public List<Issue> findAllIssues() {
         return entityManager.createNamedQuery("Issue.findAll", Issue.class).getResultList();
@@ -56,17 +71,24 @@ public class IssueService {
     }
 
     public synchronized Issue saveIssue(Issue issue) {
+        issue.setUpdatedDate(Date.from(ZonedDateTime.now().toInstant()));
+
         if (issue.getId() != null) {
             entityManager.merge(issue);
         } else {
             entityManager.persist(issue);
         }
 
+        issueChangedEvent.fire(new IssueChangedEvent(issue));
+
         return issue;
     }
 
     public void removeIssue(Long issueId) {
-        entityManager.remove(findIssue(issueId));
+        Issue issue = findIssue(issueId);
+        entityManager.remove(issue);
+
+        issueChangedEvent.fire(new IssueChangedEvent(null));
     }
 
     public List<IssueStatus> getIssueStatuses() {
@@ -96,5 +118,47 @@ public class IssueService {
                 .setParameter(1, projectId)
                 .setParameter(2, status)
                 .getResultList();
+    }
+
+    public List<Issue> findIssues(IssueCriteria issueCriteria) {
+        CriteriaQuery<Issue> issueCriteriaQuery = buildPredicate(issueCriteria);
+
+        return entityManager.createQuery(issueCriteriaQuery).getResultList();
+    }
+
+    private CriteriaQuery<Issue> buildPredicate(IssueCriteria issueCriteria) {
+        CriteriaBuilder cr = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Issue> query = cr.createQuery(Issue.class);
+        Root<Issue> root = query.from(Issue.class);
+        CriteriaQuery<Issue> select = query.select(root);
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (issueCriteria.getAssigneeId() != null) {
+            predicates.add(cr.equal(root.get("assignee").get("id"), issueCriteria.getAssigneeId()));
+        }
+
+        if (issueCriteria.getProjectId() != null) {
+            predicates.add(cr.equal(root.get("project").get("id"), issueCriteria.getProjectId()));
+        }
+
+        if (issueCriteria.getName() != null) {
+            predicates.add(cr.like(root.get("name"), issueCriteria.getName()));
+        }
+
+        if (issueCriteria.getIssueStatus() != null) {
+            predicates.add(cr.equal(root.get("status"), issueCriteria.getIssueStatus()));
+        }
+
+        if (issueCriteria.getIssueType() != null) {
+            predicates.add(cr.equal(root.get("type"), issueCriteria.getIssueType()));
+        }
+
+        if (issueCriteria.getReporterId() != null) {
+            predicates.add(cr.equal(root.get("reporter").get("id"), issueCriteria.getReporterId()));
+        }
+
+
+        return select.where(predicates.toArray(Predicate[]::new)).orderBy(cr.desc(root.get("updatedDate")));
     }
 }

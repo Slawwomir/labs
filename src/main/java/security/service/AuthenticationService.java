@@ -17,6 +17,11 @@ public class AuthenticationService {
 
     public User validateCredentials(UserCredentials userCredentials) {
         User user = userService.findUserByName(userCredentials.getUsername());
+
+        if (user == null) {
+            return null;
+        }
+
         String passwordHash = userCredentials.getPasswordHash();
 
         if (user.getUserCredentials().getPasswordHash().equals(passwordHash)) {

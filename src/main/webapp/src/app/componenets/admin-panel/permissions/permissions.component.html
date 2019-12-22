@@ -1,0 +1,58 @@
+<hr/>
+<legend>Add new permission</legend>
+<div class="form-field">
+  <label>Method:<br/>
+    <select [(ngModel)]="permission.methodName" name="method">
+      <option *ngFor="let method of methods" [ngValue]="method">{{method}}</option>
+    </select>
+  </label>
+  <label>Role:<br/>
+    <select [(ngModel)]="permission.roleName" name="role">
+      <option *ngFor="let role of roles" [ngValue]="role">{{role}}</option>
+    </select>
+  </label>
+  <label>Permission:<br/>
+    <select [(ngModel)]="permission.permissionLevel" name="permission">
+      <option *ngFor="let permission of permissionLevels" [ngValue]="permission">{{permission}}</option>
+    </select>
+  </label>
+</div>
+<div class="form-buttons">
+  <button class="button button-primary" (click)="addPermission()">Add permission</button>
+</div>
+<hr/>
+
+<table class="permissions">
+  <tr>
+    <th>
+      ID
+    </th>
+    <th>
+      ROLE
+    </th>
+    <th>
+      METHOD
+    </th>
+    <th>
+      PERMISSION LEVEL
+    </th>
+    <th>Action</th>
+  </tr>
+  <tr class="permissions" *ngFor="let permission of permissions">
+    <td>
+      {{permission.id}}
+    </td>
+    <td>
+      {{permission.roleName}}
+    </td>
+    <td>
+      {{permission.methodName}}
+    </td>
+    <td>
+      {{permission.permissionLevel}}
+    </td>
+    <td>
+      <button (click)="remove(permission.id)">Remove</button>
+    </td>
+  </tr>
+</table>

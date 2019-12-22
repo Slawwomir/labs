@@ -30,6 +30,11 @@ export class AccountManagementComponent implements OnInit {
   changePassword() {
     const passwords = this.form.value;
 
+    if(passwords.password_1 === "") {
+      this.error = "Password cannot be empty";
+      return;
+    }
+
     if (passwords.password_1 !== passwords.password_2) {
       this.error = "Passwords are not identical";
       return;

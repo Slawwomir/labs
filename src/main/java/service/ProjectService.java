@@ -16,19 +16,17 @@ public class ProjectService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public List<Project> findAllProjects() {
-        return entityManager.createNamedQuery("Project.findAll", Project.class).getResultList();
-    }
-
     public List<Project> findProjects(int start, int size) {
         return entityManager.createNamedQuery("Project.findAll", Project.class)
+                .setHint("javax.persistence.loadgraph", entityManager.getEntityGraph("Project.Graphs.withIssues"))
                 .setFirstResult(start)
                 .setMaxResults(size)
                 .getResultList();
     }
 
     public Long getProjectsCount() {
-        return entityManager.createQuery("SELECT COUNT(p) FROM Project p", Long.class).getSingleResult();
+        return entityManager.createQuery("SELECT COUNT(p) FROM Project p", Long.class)
+                .getSingleResult();
     }
 
     public Project findProject(Long id) {

@@ -1,11 +1,14 @@
 <div *ngIf="project">
   <span class="error-text" *ngIf="errors['name']">{{errors['name']}}</span>
   <h2>
-    <label (click)="edit()">
+    <label *ngIf="canUpdateProject()" (click)="edit()">
       <input *ngIf="editMode" [(ngModel)]="projectEdit.name" placeholder="name"/>
       <span *ngIf="!editMode">{{project.name}}</span>
     </label>
+    <label *ngIf="!canUpdateProject()">
+      <span>{{project.name}}</span>
+    </label>
   </h2>
   <button *ngIf="editMode" (click)="save()">save</button>
-  <app-issue-list [projectId]="project.id"></app-issue-list>
+  <app-issue-list *ngIf="canSeeOrAddIssues()" [projectId]="project.id"></app-issue-list>
 </div>

@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
 import {Project} from "../../../../models/project";
 import {ProjectService} from "../../../../services/project.service";
 import {Issue} from "../../../../models/issue";
@@ -6,13 +6,18 @@ import {IssueService} from "../../../../services/issue.service";
 import {Location} from "@angular/common";
 import {ValidationUtils} from "../../../../shared/utils/validationUtils";
 import {AuthService} from "../../../../services/auth.service";
+import {PermissionsService} from "../../../../services/permissions.service";
+import {PermissionLevel} from "../../../../models/permissionLevel";
+import {WebsocketService} from "../../../../services/websocket.service";
+import {UserService} from "../../../../services/user.service";
+import {User} from "../../../../models/user";
 
 @Component({
   selector: 'app-issue-list',
   templateUrl: './issue-list.component.html',
   styleUrls: ['./issue-list.component.css']
 })
-export class IssueListComponent implements OnInit, OnChanges {
+export class IssueListComponent implements OnInit, OnChanges, OnDestroy {
 
   private static DEFAULT_SELECT = "All";
 
@@ -22,14 +27,22 @@ export class IssueListComponent implements OnInit, OnChanges {
   statuses: string[];
   errorMessages: String[];
   filterByStatus: String = IssueListComponent.DEFAULT_SELECT;
+  addIssuePermissions: PermissionLevel[];
+  removeIssuePermissions: PermissionLevel[];
+  users: Map<number, User> = new Map<number, User>();
 
   isFullCreate: boolean;
   newIssue: Issue;
 
+  subject;
+
   constructor(
     private projectService: ProjectService,
     private issueService: IssueService,
+    private userService: UserService,
+    private permissionsService: PermissionsService,
     private authService: AuthService,
+    private webSocket: WebsocketService,
     private location: Location
   ) {
   }
@@ -38,6 +51,27 @@ export class IssueListComponent implements OnInit, OnChanges {
     this.errorMessages = [];
     this.getIssues();
     this.getStatuses();
+
+    this.permissionsService.getUserPermissionsForAction("addIssue")
+      .subscribe(permissions =>
+        this.addIssuePermissions = permissions
+      );
+
+    this.permissionsService.getUserPermissionsForAction("removeIssue")
+      .subscribe(permissions =>
+        this.removeIssuePermissions = permissions
+      );
+
+    this.watchIssues();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.projectId = changes.projectId.currentValue;
+    this.getIssues();
+  }
+
+  ngOnDestroy(): void {
+    this.webSocket.disconnect(this.subject);
   }
 
   add(issueName: string): void {
@@ -77,6 +111,14 @@ export class IssueListComponent implements OnInit, OnChanges {
     this.location.back();
   }
 
+  canRemoveIssue(reporterId: number) {
+    return ValidationUtils.validatePermissions(this.removeIssuePermissions, reporterId, this.authService.getUserId());
+  }
+
+  canAddIssue() {
+    return ValidationUtils.validatePermissions(this.addIssuePermissions);
+  }
+
   private getIssues(): void {
     let filters: {};
 
@@ -84,8 +126,21 @@ export class IssueListComponent implements OnInit, OnChanges {
       filters = {status: this.filterByStatus};
     }
 
-    this.projectService.getIssues({id: this.projectId} as Project, filters)
-      .subscribe(issues => this.issues = issues);
+    this.projectService.getIssuesForProject({id: this.projectId} as Project, filters)
+      .subscribe(issues => {
+        this.issues = issues;
+        this.fetchUsers();
+      });
+  }
+
+  private fetchUsers() {
+    this.permissionsService.getUserPermissionsForAction("getUser")
+      .subscribe(response => {
+          if (ValidationUtils.validatePermissions(response)) {
+            this.issues.forEach(issue => this.getReporter(issue.reporterId))
+          }
+        }
+      );
   }
 
   private getStatuses(): void {
@@ -93,8 +148,20 @@ export class IssueListComponent implements OnInit, OnChanges {
       .subscribe(statuses => this.statuses = statuses);
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    this.projectId = changes.projectId.currentValue;
-    this.getIssues();
+  private watchIssues() {
+    this.subject = this.webSocket.connect(this.projectId);
+    this.subject.onMessage = (message => {
+      this.getIssues();
+    });
+    this.subject.subscribe(m => {
+      this.getIssues();
+    })
+  }
+
+  private getReporter(reporterId: number) {
+    this.userService.getUser(reporterId)
+      .subscribe(user =>
+        this.users.set(reporterId, user)
+      )
   }
 }

@@ -1,36 +1,34 @@
 package rest.resource;
 
+import domain.issue.IssueCriteria;
 import domain.issue.IssueStatus;
+import domain.issue.IssueType;
 import repository.entities.Issue;
 import repository.entities.Project;
 import rest.dto.issue.IssueDTO;
 import rest.dto.issue.IssuesDTO;
 import rest.dto.project.ProjectDTO;
 import rest.dto.project.ProjectsDTO;
+import rest.resource.annotations.HideForPermission;
+import rest.resource.annotations.IssueId;
+import rest.resource.annotations.ProjectId;
+import rest.resource.interceptors.IssueInterceptor;
+import rest.resource.interceptors.MethodInterceptor;
+import rest.resource.interceptors.ProjectInterceptor;
 import rest.resource.utils.LinksUtils;
 import rest.validation.annotations.ProjectExists;
+import rest.validation.annotations.UserExists;
+import security.ApplicationUser;
 import service.IssueService;
+import service.PermissionService;
 import service.ProjectService;
 
-import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.interceptor.Interceptors;
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Link;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,7 +36,10 @@ import java.util.stream.Collectors;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @RequestScoped
-public class ProjectResource {
+public class ProjectResource implements Secured {
+
+    @Context
+    private SecurityContext securityContext;
 
     @Inject
     private ProjectService projectService;
@@ -47,10 +48,13 @@ public class ProjectResource {
     private IssueService issueService;
 
     @Inject
+    private PermissionService permissionService;
+
+    @Inject
     private LinksUtils linksUtils;
 
     @GET
-    @RolesAllowed({"ADMIN", "USER"})
+    @HideForPermission
     public Response getProjects(
             @QueryParam("start") int start,
             @QueryParam("size") @DefaultValue("2") int size,
@@ -59,7 +63,10 @@ public class ProjectResource {
             size = Integer.MAX_VALUE;
         }
 
+        ApplicationUser applicationUser = (ApplicationUser) securityContext.getUserPrincipal();
+
         List<ProjectDTO> projects = projectService.findProjects(start, size).stream()
+                .filter(project -> permissionService.hasUserPermissionToProject(applicationUser.getId(), project.getId(), "getProject"))
                 .map(ProjectDTO::new)
                 .collect(Collectors.toList());
 
@@ -71,7 +78,7 @@ public class ProjectResource {
     }
 
     @POST
-    @RolesAllowed({"ADMIN"})
+    @Interceptors(MethodInterceptor.class)
     public Response addProject(@Valid ProjectDTO project) {
         if (project.getId() != null && projectService.findProject(project.getId()) != null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -82,7 +89,7 @@ public class ProjectResource {
     }
 
     @PUT
-    @RolesAllowed({"ADMIN"})
+    @Interceptors(ProjectInterceptor.class)
     public Response updateProject(@Valid ProjectDTO project) {
         if (project.getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -94,8 +101,8 @@ public class ProjectResource {
 
     @DELETE
     @Path("{projectId}")
-    @RolesAllowed({"ADMIN"})
-    public Response removeProject(@PathParam("projectId") @ProjectExists Long projectId) {
+    @Interceptors(ProjectInterceptor.class)
+    public Response removeProject(@PathParam("projectId") @ProjectExists @ProjectId Long projectId) {
         projectService.removeProject(projectId);
 
         return Response.ok().build();
@@ -103,9 +110,9 @@ public class ProjectResource {
 
     @GET
     @Path("{projectId}")
-    @RolesAllowed({"ADMIN", "USER"})
+    @Interceptors(ProjectInterceptor.class)
     public Response getProject(@Context UriInfo uriInfo,
-                               @PathParam("projectId") @ProjectExists Long projectId) {
+                               @PathParam("projectId") @ProjectExists @ProjectId Long projectId) {
         Project project = projectService.findProject(projectId);
         ProjectDTO projectDTO = new ProjectDTO(project);
         linksUtils.setLinksForProject(uriInfo, projectDTO);
@@ -114,34 +121,46 @@ public class ProjectResource {
 
     @GET
     @Path("{projectId}/issues")
-    @RolesAllowed({"ADMIN", "USER"})
+    @HideForPermission
     public Response getProjectIssues(
             @Context UriInfo uriInfo,
-            @PathParam("projectId") @ProjectExists Long projectId,
-            @QueryParam("status") IssueStatus status) {
-        List<Issue> results;
-        if (status != null) {
-            results = issueService.findIssuesByProjectIdAndStatus(projectId, status);
-        } else {
-            results = issueService.findIssuesByProjectId(projectId);
-        }
+            @PathParam("projectId") @ProjectExists @ProjectId Long projectId,
+            @QueryParam("status") IssueStatus issueStatus,
+            @QueryParam("type") IssueType issueType,
+            @QueryParam("assigneeId") @UserExists Long assigneeId,
+            @QueryParam("reporterId") @UserExists Long reporterId) {
 
-        List<IssueDTO> issues = results.stream()
+        IssueCriteria issueCriteria = IssueCriteria.builder()
+                .projectId(projectId)
+                .issueStatus(issueStatus)
+                .assigneeId(assigneeId)
+                .reporterId(reporterId)
+                .build();
+
+        List<Issue> results = issueService.findIssues(issueCriteria);
+        List<IssueDTO> issues = checkPermission(results);
+        issues.forEach(issue -> linksUtils.setLinksForIssue(uriInfo, issue));
+        List<Link> link = List.of(linksUtils.getSelfLink(uriInfo.getRequestUri(), "self", "GET"));
+
+        return Response.ok(new IssuesDTO(issues, link)).build();
+    }
+
+    private List<IssueDTO> checkPermission(List<Issue> results) {
+        ApplicationUser user = (ApplicationUser) securityContext.getUserPrincipal();
+
+        return results.stream()
+                .filter(issue -> permissionService.hasUserPermissionToIssue(user.getId(), issue.getId(), "getIssue"))
                 .map(IssueDTO::new)
                 .collect(Collectors.toList());
-        issues.forEach(issue -> linksUtils.setLinksForIssue(uriInfo, issue));
-
-        List<Link> link = List.of(linksUtils.getSelfLink(uriInfo.getRequestUri(), "self", "GET"));
-        return Response.ok(new IssuesDTO(issues, link)).build();
     }
 
     @GET
     @Path("{projectId}/issues/{issueId}")
-    @RolesAllowed({"ADMIN", "USER"})
+    @Interceptors(IssueInterceptor.class)
     public Response getProjectIssue(
             @Context UriInfo uriInfo,
-            @PathParam("projectId") Long projectId,
-            @PathParam("issueId") Long issueId
+            @PathParam("projectId") @ProjectId Long projectId,
+            @PathParam("issueId") @IssueId Long issueId
     ) {
         Project project = projectService.findProject(projectId);
 
@@ -159,5 +178,11 @@ public class ProjectResource {
         linksUtils.setLinksForIssue(uriInfo, issueDTO);
 
         return Response.ok(issueDTO).build();
+    }
+
+    @Override
+    @HideForPermission
+    public SecurityContext getSecurityContext() {
+        return securityContext;
     }
 }
